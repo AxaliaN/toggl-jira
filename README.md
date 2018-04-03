@@ -3,7 +3,7 @@ A sync tool to log time logged in Toggl to Jira issues
 
 ## Usage
 
-Modify the config.json file with your details, then run:
+Copy config.json.dist to config.json. fill it with your details, then run:
 
 `php bin/toggljira.php`
 

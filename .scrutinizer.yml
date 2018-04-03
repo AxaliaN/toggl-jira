@@ -1,0 +1,70 @@
+before_commands:
+    - "composer install"
+
+checks:
+    php: true
+
+build:
+    environment:
+        timezone: 'Europe/Amsterdam'
+        variables:
+              integration_test_file: 'config_scrutinizer.php'
+        php:
+            version: '7.1'
+            ini:
+                'date.timezone': 'Europe/Amsterdam'
+    dependencies:
+        # Runs before inferred commands
+        before:
+          - 'source /etc/lsb-release && echo "deb http://download.rethinkdb.com/apt $DISTRIB_CODENAME main" | sudo tee /etc/apt/sources.list.d/rethinkdb.list'
+          - 'wget -qO- https://download.rethinkdb.com/apt/pubkey.gpg | sudo apt-key add -'
+          - 'sudo apt-get update -y'
+          - 'sudo apt-get install rethinkdb -y'
+          - 'sudo cp /etc/rethinkdb/default.conf.sample /etc/rethinkdb/instances.d/instance1.conf'
+          - 'sudo /etc/init.d/rethinkdb start'
+        # Overwrites inferred commands
+        override: []
+        # Runs after inferred commands
+        after: []
+    # Run after dependencies
+    project_setup:
+        before: []
+        override: []
+        after: []
+    nodes:
+        tests: true
+        analysis:
+            tests:
+                override:
+                    -
+                        command: phpcs-run --standard=phpcs.xml
+                        use_website_config: false
+                    - php-scrutinizer-run
+
+build_failure_conditions:
+  # No critical issue is introduced (existing ones are tolerated)
+  - 'issues.label("coding-style").exists'
+
+  # No new critical issue is introduced (existing ones are tolerated)
+  - 'issues.label("coding-style").new.exists'
+
+  # No critical issue is present
+  - 'issues.severity(= MINOR).exists'
+
+  # No new critical issue is introduced (existing ones are tolerated)
+  - 'issues.severity(= MINOR).new.exists'
+
+  # Class has no tests
+  - 'classes.metric("php_code_coverage.coverage", = 0).exists'
+
+  # Rating is C or worse for existing classes
+  - 'elements.rating(<= C).exists'
+
+  # Rating is C or worse is introduced
+  - 'elements.rating(<= C).new.exists'
+
+  - 'project.metric("scrutinizer.quality", < 9)' # Code Quality Rating drops below 9
+  - 'project.metric("scrutinizer.test_coverage", < 0.90)' # Code Coverage drops below 90%
+
+  # Code Coverage decreased from previous inspection by more than 5%
+  - 'project.metric_change("scrutinizer.test_coverage", < -0.05)'

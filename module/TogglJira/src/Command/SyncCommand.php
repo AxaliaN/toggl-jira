@@ -9,7 +9,7 @@ use Zend\Config\Writer\Json;
 use Zend\Console\Adapter\AdapterInterface;
 use Zend\Console\Request;
 
-class SyncCommand
+class SyncCommand implements CommandInterface
 {
     /**
      * @var SyncService

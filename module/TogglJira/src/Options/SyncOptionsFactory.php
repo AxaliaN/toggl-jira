@@ -14,7 +14,7 @@ class SyncOptionsFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): SyncOptions
     {
-        $config = json_decode(file_get_contents('config.json'), true);
+        $config = json_decode(file_get_contents(__DIR__ . '/../../../../config.json'), true);
 
         ConfigKeyValidator::validateConfig(
             ['lastSync', 'jiraUsername', 'jiraPassword', 'togglApiKey', 'jiraUrl'],

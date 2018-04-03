@@ -15,6 +15,7 @@ class SyncServiceFactory implements FactoryInterface
 {
     /**
      * {@inheritdoc}
+     * @throws \Exception
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): SyncService
     {
