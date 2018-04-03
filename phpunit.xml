@@ -1,0 +1,14 @@
+<phpunit bootstrap="src/Bootstrap.php" backupGlobals="false">
+    <testsuites>
+        <testsuite name="TogglJira unit test suite">
+            <directory>test/*</directory>
+        </testsuite>
+    </testsuites>
+    <filter>
+        <whitelist addUncoveredFilesFromWhitelist="true" processUncoveredFilesFromWhitelist="false">
+            <directory suffix=".php">src/*</directory>
+            <exclude>
+            </exclude>
+        </whitelist>
+    </filter>
+</phpunit>
