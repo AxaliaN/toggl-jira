@@ -18,7 +18,7 @@ class CommandHandlerFactoryTest extends BaseContainerTestCase
         $this->getContainer()
             ->shouldReceive('get')
             ->once()
-            ->withArgs(['AcsiEventHandling\Logger'])
+            ->withArgs(['Logger'])
             ->andReturn($loggerMock);
 
         $this->assertInstanceOf(CommandHandler::class, $factory($this->getContainer(), ''));

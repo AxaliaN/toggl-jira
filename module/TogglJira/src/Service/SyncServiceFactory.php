@@ -29,7 +29,7 @@ class SyncServiceFactory implements FactoryInterface
 
         $togglClient = TogglClient::factory(['api_key' => $syncOptions->getTogglApiKey(), 'apiVersion' => 'v8']);
 
-        $logger = $container->get('AcsiEventHandling\Logger');
+        $logger = $container->get('Logger');
 
         $service = new SyncService($api, $togglClient, new WorkLogHydrator(), '5abe06ff5dcb0a34cbf50d23');
         $service->setLogger($logger);

@@ -33,7 +33,7 @@ class SyncCommandFactoryTest extends BaseContainerTestCase
         $this->getContainer()
             ->shouldReceive('get')
             ->once()
-            ->withArgs(['AcsiEventHandling\Logger'])
+            ->withArgs(['Logger'])
             ->andReturn($loggerMock);
 
         $factory = new SyncCommandFactory();

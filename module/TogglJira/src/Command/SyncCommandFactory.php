@@ -23,7 +23,7 @@ class SyncCommandFactory implements FactoryInterface
         $writer = new Json();
         
         $command = new SyncCommand($container->get(SyncService::class), $syncOptions, $writer);
-        $command->setLogger($container->get('AcsiEventHandling\Logger'));
+        $command->setLogger($container->get('Logger'));
 
         return $command;
     }

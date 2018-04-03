@@ -32,7 +32,7 @@ class SyncServiceFactoryTest extends BaseContainerTestCase
 
         $this->getContainer()
             ->shouldReceive('get')
-            ->withArgs(['AcsiEventHandling\Logger'])
+            ->withArgs(['Logger'])
             ->andReturn($loggerMock);
 
         $factory = new SyncServiceFactory();

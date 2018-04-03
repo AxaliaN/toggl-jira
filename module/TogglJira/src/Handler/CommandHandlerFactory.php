@@ -15,7 +15,7 @@ class CommandHandlerFactory implements FactoryInterface
     {
         $commandHandler = new CommandHandler($container);
 
-        $logger = $container->get('AcsiEventHandling\Logger');
+        $logger = $container->get('Logger');
 
         $commandHandler->setLogger($logger);
 

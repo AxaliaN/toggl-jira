@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace TogglJira;
 
 use TogglJira\Command\SyncCommand;
