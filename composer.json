@@ -1,5 +1,5 @@
 {
-    "name": "acsi-it/toggl-jira",
+    "name": "AxaliaN/toggl-jira",
     "description": "A sync tool to log time logged in Toggl to Jira issues",
     "type": "project",
     "license": "BSD-3-Clause",

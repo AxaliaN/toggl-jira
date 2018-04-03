@@ -21,7 +21,7 @@ class SyncOptionsFactoryTest extends BaseContainerTestCase
 
         file_put_contents(__DIR__ . '/../../../../config.json', '{
             "lastSync": "2018-04-03T10:10:55+02:00",
-            "jiraUrl": "https://acsi-jira.atlassian.net",
+            "jiraUrl": "https://jira.atlassian.net",
             "jiraUsername": "foo",
             "jiraPassword": "bar",
             "togglApiKey": "baz"

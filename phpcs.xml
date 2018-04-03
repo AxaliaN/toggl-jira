@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset ref="ACSI">
+<ruleset ref="TogglJira">
     <description>The coding standard for PHP_CodeSniffer itself.</description>
     <!-- Include the whole PSR standard -->
     <rule ref="PSR2">

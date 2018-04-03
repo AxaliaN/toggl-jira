@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace ACSI\Worker\Test\Handler;
+namespace TogglJiraTest\Handler;
 
 use Psr\Log\LoggerInterface;
 use TogglJira\Handler\CommandHandler;
