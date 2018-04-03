@@ -7,8 +7,8 @@
 
     <!-- Check all PHP files in directory tree by default. -->
     <arg name="extensions" value="php"/>
-    <file>src</file>
-    <file>test</file>
+    <file>module/TogglJira/src/</file>
+    <file>module/TogglJira/test/</file>
 
     <!-- Show progress and sniff codes in all reports -->
     <arg value="ps"/>
