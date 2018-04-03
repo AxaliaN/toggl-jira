@@ -61,7 +61,7 @@ class SyncOptionsFactoryTest extends BaseContainerTestCase
     {
         parent::tearDown();
 
-        @\unlink(__DIR__ . '/../../../../config.json');
+        \unlink(__DIR__ . '/../../../../config.json');
 
         if (\file_exists(__DIR__ . '/../../../../config.json.bak')) {
             \rename(__DIR__ . '/../../../../config.json.bak', __DIR__ . '/../../../../config.json');

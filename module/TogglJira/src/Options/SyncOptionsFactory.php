@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace TogglJira\Options;
 
 use Interop\Container\ContainerInterface;
-use TogglJira\Utils\ConfigKeyValidator;
 use Zend\Config\Reader\Json;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
