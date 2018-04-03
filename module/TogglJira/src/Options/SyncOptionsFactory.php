@@ -5,6 +5,7 @@ namespace TogglJira\Options;
 
 use Interop\Container\ContainerInterface;
 use TogglJira\Utils\ConfigKeyValidator;
+use Zend\Config\Reader\Json;
 use Zend\ServiceManager\Factory\FactoryInterface;
 
 class SyncOptionsFactory implements FactoryInterface
@@ -14,14 +15,15 @@ class SyncOptionsFactory implements FactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): SyncOptions
     {
-        $config = json_decode(file_get_contents(__DIR__ . '/../../../../config.json'), true);
+        $reader = new Json();
+        $config = $reader->fromFile(__DIR__ . '/../../../../config.json');
 
-        ConfigKeyValidator::validateConfig(
-            ['lastSync', 'jiraUsername', 'jiraPassword', 'togglApiKey', 'jiraUrl'],
-            $config
-        );
-
-        if (empty($config['jiraUsername']) || empty($config['jiraPassword']) || empty($config['togglApiKey'])) {
+        if (
+        (!isset($config['jiraUsername']) || empty($config['jiraUsername'])) ||
+        (!isset($config['jiraPassword']) || empty($config['jiraPassword'])) ||
+        (!isset($config['togglApiKey']) || empty($config['togglApiKey'])) ||
+        (!isset($config['jiraUrl']) || empty($config['jiraUrl']))
+        ) {
             throw new \RuntimeException('Invalid config.json, please fill out everything except lastSync');
         }
 

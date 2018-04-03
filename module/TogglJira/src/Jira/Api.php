@@ -15,7 +15,7 @@ class Api extends BaseApi
      * @param string $created
      * @return array|BaseApi\Result|false
      */
-    public function addWorkEntry(
+    public function addWorkLogEntry(
         string $issueID,
         int $seconds,
         string $userID,

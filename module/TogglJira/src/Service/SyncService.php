@@ -57,37 +57,29 @@ class SyncService implements LoggerAwareInterface
             /** @var array $timeEntries */
             $timeEntries = $this->togglClient->getTimeEntries(['start_date' => $startDate]);
         } catch (\Exception $e) {
-            $this->logger->error("Failed to get time entries from Toggl: {$e->getMessage()}");
+            $this->logger->error(
+                "Failed to get time entries from Toggl: {$e->getMessage()}",
+                ['exception' => $e]
+            );
             return;
         }
 
         foreach ($timeEntries as $timeEntry) {
-            $data = [
-                'issueID' => explode(' ', $timeEntry['description'])[0],
-                'timeSpent' => $timeEntry['duration'],
-                'comment' => $timeEntry['description'],
-                'spentOn' => $timeEntry['at']
-            ];
+            $workLogEntry = $this->parseTimeEntry($timeEntry);
 
-            if (strpos($data['issueID'], '-') === false) {
-                $this->logger->warning('Could not parse issue string, cannot link to Jira');
+            if (!$workLogEntry) {
                 continue;
             }
 
-            if ($data['timeSpent'] < 0) {
-                $this->logger->info("0 seconds, or timer still running for {$data['issueID']}, skipping");
-                continue;
-            }
+            $workLogEntries[] = $workLogEntry;
 
-            $workLogEntries[] = $this->workLogHydrator->hydrate($data, new WorkLogEntry());
-
-            $this->logger->info("Found time entry for user story {$data['issueID']}");
+            $this->logger->info("Found time entry for user story {$workLogEntry->getIssueID()}");
         }
 
         /** @var WorkLogEntry $workLogEntry */
         foreach ($workLogEntries as $workLogEntry) {
             try {
-                $this->api->addWorkEntry(
+                $this->api->addWorkLogEntry(
                     $workLogEntry->getIssueID(),
                     $workLogEntry->getTimeSpent(),
                     $this->userID,
@@ -97,10 +89,37 @@ class SyncService implements LoggerAwareInterface
 
                 $this->logger->info("Added worklog entry for issue {$workLogEntry->getIssueID()}");
             } catch (\Exception $e) {
-                $this->logger->error("Could not add worklog entry: {$e->getMessage()}");
+                $this->logger->error("Could not add worklog entry: {$e->getMessage()}", ['exception' => $e]);
             }
         }
 
         $this->logger->info('All done for today, time to go home!');
+    }
+
+    /**
+     * @param array $timeEntry
+     * @return WorkLogEntry|null
+     * @throws \Exception
+     */
+    private function parseTimeEntry(array $timeEntry): ?WorkLogEntry
+    {
+        $data = [
+            'issueID' => explode(' ', $timeEntry['description'])[0],
+            'timeSpent' => $timeEntry['duration'],
+            'comment' => $timeEntry['description'],
+            'spentOn' => $timeEntry['at']
+        ];
+
+        if (strpos($data['issueID'], '-') === false) {
+            $this->logger->warning('Could not parse issue string, cannot link to Jira');
+            return null;
+        }
+
+        if ($data['timeSpent'] < 0) {
+            $this->logger->info("0 seconds, or timer still running for {$data['issueID']}, skipping");
+            return null;
+        }
+
+        return $this->workLogHydrator->hydrate($data, new WorkLogEntry());
     }
 }

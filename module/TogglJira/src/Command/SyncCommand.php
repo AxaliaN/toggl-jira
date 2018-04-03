@@ -56,7 +56,7 @@ class SyncCommand implements CommandInterface, LoggerAwareInterface
             );
         }
 
-        $console->writeLine("Syncing time entries since {$this->syncOptions->getLastSync()}");
+        $this->logger->info("Syncing time entries since {$this->syncOptions->getLastSync()}");
         $this->service->sync($this->syncOptions->getLastSync());
 
         $this->syncOptions->setLastSync((new \DateTimeImmutable())->format(DATE_ATOM));
