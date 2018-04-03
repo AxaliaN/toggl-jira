@@ -14,7 +14,6 @@ class SyncCommandFactory implements FactoryInterface
 
     /**
      * {@inheritdoc}
-     * @throws \Zend\Db\Adapter\Exception\InvalidArgumentException
      * @throws \Exception
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): SyncCommand
@@ -23,6 +22,9 @@ class SyncCommandFactory implements FactoryInterface
         $syncOptions = $container->get(SyncOptions::class);
         $writer = new Json();
         
-        return new SyncCommand($container->get(SyncService::class), $syncOptions, $writer);
+        $command = new SyncCommand($container->get(SyncService::class), $syncOptions, $writer);
+        $command->setLogger($container->get('AcsiEventHandling\Logger'));
+
+        return $command;
     }
 }

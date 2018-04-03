@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace TogglJiraTest\Command;
 
+use Psr\Log\LoggerInterface;
 use TogglJira\Command\SyncCommand;
 use TogglJira\Command\SyncCommandFactory;
 use TogglJira\Options\SyncOptions;
@@ -15,6 +16,7 @@ class SyncCommandFactoryTest extends BaseContainerTestCase
     {
         $syncOptionMock = \Mockery::mock(SyncOptions::class);
         $syncServiceMock = \Mockery::mock(SyncService::class);
+        $loggerMock = \Mockery::mock(LoggerInterface::class);
 
         $this->getContainer()
             ->shouldReceive('get')
@@ -27,6 +29,12 @@ class SyncCommandFactoryTest extends BaseContainerTestCase
             ->once()
             ->with(SyncService::class)
             ->andReturn($syncServiceMock);
+
+        $this->getContainer()
+            ->shouldReceive('get')
+            ->once()
+            ->with('AcsiEventHandling\Logger')
+            ->andReturn($loggerMock);
 
         $factory = new SyncCommandFactory();
         $instance = $factory->__invoke($this->getContainer(), SyncCommand::class);

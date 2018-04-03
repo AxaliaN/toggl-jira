@@ -3,14 +3,18 @@ declare(strict_types=1);
 
 namespace TogglJira\Command;
 
+use Psr\Log\LoggerAwareInterface;
+use Psr\Log\LoggerAwareTrait;
 use TogglJira\Options\SyncOptions;
 use TogglJira\Service\SyncService;
 use Zend\Config\Writer\Json;
 use Zend\Console\Adapter\AdapterInterface;
 use Zend\Console\Request;
 
-class SyncCommand implements CommandInterface
+class SyncCommand implements CommandInterface, LoggerAwareInterface
 {
+    use LoggerAwareTrait;
+
     /**
      * @var SyncService
      */
@@ -59,7 +63,7 @@ class SyncCommand implements CommandInterface
 
         $this->writer->toFile('config.json', $this->syncOptions->toArray());
 
-        $console->writeLine('Updated last sync time');
+        $this->logger->info('Updated last sync time');
 
         return 1;
     }

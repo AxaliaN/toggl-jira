@@ -6,7 +6,7 @@ return [
     'monolog' => [
         'loggers' => [
             'AcsiErrorHandling\Logger' => [
-                'name' => 'event',
+                'name' => 'error',
                 'handlers' => [
                     'default' => [
                         'name' => 'Monolog\Handler\StreamHandler',
@@ -18,7 +18,7 @@ return [
                 ]
             ],
             'AcsiEventHandling\Logger' => [
-                'name' => 'error',
+                'name' => 'event',
                 'handlers' => [
                     'default' => [
                         'name' => 'Monolog\Handler\StreamHandler',
