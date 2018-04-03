@@ -57,7 +57,7 @@ class SyncCommand
 
         $this->syncOptions->setLastSync((new \DateTimeImmutable())->format(DATE_ATOM));
 
-        $this->writer->toFile(__DIR__ . 'config.json', $this->syncOptions->toArray());
+        $this->writer->toFile('config.json', $this->syncOptions->toArray());
 
         $console->writeLine('Updated last sync time');
 

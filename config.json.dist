@@ -1,7 +1,7 @@
 {
-    "lastSync": "2018-04-03T08:44:42+02:00",
+    "lastSync": "",
     "jiraUrl": "https://acsi-jira.atlassian.net",
-    "jiraUsername": "mmaas",
-    "jiraPassword": "N5sYaXt*7pGi",
-    "togglApiKey": "e55585d8399bfcc5b45dc7db9b793cca"
+    "jiraUsername": "",
+    "jiraPassword": "",
+    "togglApiKey": ""
 }

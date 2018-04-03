@@ -8,7 +8,7 @@ return [
             './vendor',
         ],
         'config_glob_paths' => [
-            __DIR__ . '/autoload/{{,*.}global,{,*.}local}.php',
+            realpath(__DIR__) . '/autoload/{{,*.}global,{,*.}local}.php',
         ],
         'config_cache_enabled' => false,
         'config_cache_key' => 'application.config.cache',
