@@ -21,19 +21,19 @@ class SyncCommandFactoryTest extends BaseContainerTestCase
         $this->getContainer()
             ->shouldReceive('get')
             ->once()
-            ->with(SyncOptions::class)
+            ->withArgs([SyncOptions::class])
             ->andReturn($syncOptionMock);
 
         $this->getContainer()
             ->shouldReceive('get')
             ->once()
-            ->with(SyncService::class)
+            ->withArgs([SyncService::class])
             ->andReturn($syncServiceMock);
 
         $this->getContainer()
             ->shouldReceive('get')
             ->once()
-            ->with('AcsiEventHandling\Logger')
+            ->withArgs(['AcsiEventHandling\Logger'])
             ->andReturn($loggerMock);
 
         $factory = new SyncCommandFactory();
