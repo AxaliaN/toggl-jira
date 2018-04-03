@@ -58,7 +58,7 @@ class SyncService implements LoggerAwareInterface
             $timeEntries = $this->togglClient->getTimeEntries(['start_date' => $startDate]);
         } catch (\Exception $e) {
             $this->logger->error("Failed to get time entries from Toggl: {$e->getMessage()}");
-            exit(0);
+            return;
         }
 
         foreach ($timeEntries as $timeEntry) {

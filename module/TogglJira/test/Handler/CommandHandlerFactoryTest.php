@@ -17,6 +17,7 @@ class CommandHandlerFactoryTest extends BaseContainerTestCase
         $loggerMock = \Mockery::mock(LoggerInterface::class);
         $this->getContainer()
             ->shouldReceive('get')
+            ->once()
             ->with('AcsiEventHandling\Logger')
             ->andReturn($loggerMock);
 

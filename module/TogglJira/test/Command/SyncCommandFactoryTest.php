@@ -18,11 +18,13 @@ class SyncCommandFactoryTest extends BaseContainerTestCase
 
         $this->getContainer()
             ->shouldReceive('get')
+            ->once()
             ->with(SyncOptions::class)
             ->andReturn($syncOptionMock);
 
         $this->getContainer()
             ->shouldReceive('get')
+            ->once()
             ->with(SyncService::class)
             ->andReturn($syncServiceMock);
 
