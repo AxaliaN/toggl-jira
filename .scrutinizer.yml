@@ -34,10 +34,10 @@ build_failure_conditions:
   - 'issues.label("coding-style").new.exists'
 
   # No critical issue is present
-  - 'issues.severity(= MINOR).exists'
+  - 'issues.severity(= MAJOR).exists'
 
   # No new critical issue is introduced (existing ones are tolerated)
-  - 'issues.severity(= MINOR).new.exists'
+  - 'issues.severity(= MAJOR).new.exists'
 
   # Class has no tests
   - 'classes.metric("php_code_coverage.coverage", = 0).exists'
