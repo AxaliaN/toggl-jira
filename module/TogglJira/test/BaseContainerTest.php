@@ -8,7 +8,7 @@ use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
 use Zend\ServiceManager\ServiceManager;
 
-class BaseContainerTestCase extends TestCase
+class BaseContainerTest extends TestCase
 {
     /**
      * @var MockInterface
@@ -20,6 +20,9 @@ class BaseContainerTestCase extends TestCase
         Mockery::close();
     }
 
+    /**
+     * @return void
+     */
     protected function setUp(): void
     {
         Mockery::getConfiguration()->allowMockingNonExistentMethods(false);

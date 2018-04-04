@@ -7,9 +7,9 @@ use Psr\Log\LoggerInterface;
 use TogglJira\Options\SyncOptions;
 use TogglJira\Service\SyncService;
 use TogglJira\Service\SyncServiceFactory;
-use TogglJiraTest\BaseContainerTestCase;
+use TogglJiraTest\BaseContainerTest;
 
-class SyncServiceFactoryTest extends BaseContainerTestCase
+class SyncServiceFactoryTest extends BaseContainerTest
 {
     /**
      * @return void

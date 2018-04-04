@@ -5,9 +5,9 @@ namespace TogglJiraTest\Options;
 
 use TogglJira\Options\SyncOptions;
 use TogglJira\Options\SyncOptionsFactory;
-use TogglJiraTest\BaseContainerTestCase;
+use TogglJiraTest\BaseContainerTest;
 
-class SyncOptionsFactoryTest extends BaseContainerTestCase
+class SyncOptionsFactoryTest extends BaseContainerTest
 {
     /**
      * @return void

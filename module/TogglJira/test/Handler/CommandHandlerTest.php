@@ -7,13 +7,13 @@ use Psr\Log\LoggerInterface;
 use TogglJira\Command\CommandInterface;
 use TogglJira\Exception\CommandNotFoundException;
 use TogglJira\Handler\CommandHandler;
-use TogglJiraTest\BaseContainerTestCase;
+use TogglJiraTest\BaseContainerTest;
 use Zend\Console\Adapter\AdapterInterface;
 use Zend\Console\Request;
 use Zend\Stdlib\Parameters;
 use ZF\Console\Route;
 
-class CommandHandlerTest extends BaseContainerTestCase
+class CommandHandlerTest extends BaseContainerTest
 {
     /**
      * @return void

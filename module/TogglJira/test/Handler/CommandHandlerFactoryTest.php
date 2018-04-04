@@ -6,9 +6,9 @@ namespace TogglJiraTest\Handler;
 use Psr\Log\LoggerInterface;
 use TogglJira\Handler\CommandHandler;
 use TogglJira\Handler\CommandHandlerFactory;
-use TogglJiraTest\BaseContainerTestCase;
+use TogglJiraTest\BaseContainerTest;
 
-class CommandHandlerFactoryTest extends BaseContainerTestCase
+class CommandHandlerFactoryTest extends BaseContainerTest
 {
     public function testInvoke()
     {

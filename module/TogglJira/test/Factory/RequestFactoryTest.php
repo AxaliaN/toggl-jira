@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace TogglJiraTest\Factory;
 
 use TogglJira\Factory\RequestFactory;
-use TogglJiraTest\BaseContainerTestCase;
+use TogglJiraTest\BaseContainerTest;
 use Zend\Console\Request;
 
-class RequestFactoryTest extends BaseContainerTestCase
+class RequestFactoryTest extends BaseContainerTest
 {
     public function testInvoke()
     {

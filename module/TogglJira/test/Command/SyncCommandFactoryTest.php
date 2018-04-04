@@ -8,9 +8,9 @@ use TogglJira\Command\SyncCommand;
 use TogglJira\Command\SyncCommandFactory;
 use TogglJira\Options\SyncOptions;
 use TogglJira\Service\SyncService;
-use TogglJiraTest\BaseContainerTestCase;
+use TogglJiraTest\BaseContainerTest;
 
-class SyncCommandFactoryTest extends BaseContainerTestCase
+class SyncCommandFactoryTest extends BaseContainerTest
 {
     public function testInvoke()
     {
