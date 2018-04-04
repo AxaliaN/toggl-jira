@@ -49,7 +49,7 @@ build_failure_conditions:
   - 'elements.rating(<= C).new.exists'
 
   - 'project.metric("scrutinizer.quality", < 9)' # Code Quality Rating drops below 9
-  - 'project.metric("scrutinizer.test_coverage", < 0.85)' # Code Coverage drops below 90%
+  - 'project.metric("scrutinizer.test_coverage", < 0.85)' # Code Coverage drops below 85%
 
   # Code Coverage decreased from previous inspection by more than 5%
   - 'project.metric_change("scrutinizer.test_coverage", < -0.05)'
