@@ -48,7 +48,7 @@ class WorkLogHydrator implements HydratorInterface
             $object->setComment($data['comment']);
         }
 
-        if (isset($data['issueID'])) {
+        if (isset($data['spentOn'])) {
             $object->setSpentOn(new DateTimeImmutable($data['spentOn']));
         }
 

@@ -10,7 +10,7 @@ class Api extends BaseApi
     /**
      * @param string $issueID
      * @param int $seconds
-     * @param string $userID
+     * @param string $accountId
      * @param string $comment
      * @param string $created
      * @return array|BaseApi\Result|false
@@ -18,19 +18,33 @@ class Api extends BaseApi
     public function addWorkLogEntry(
         string $issueID,
         int $seconds,
-        string $userID,
+        string $accountId,
         string $comment,
         string $created
     ) {
         $params = [
-            'author' => [
-                'accountId' => $userID,
-            ],
-            'created' => $created,
             'timeSpentSeconds' => $seconds,
-            'comment' => $comment
+            'author' => [
+                'accountId' => $accountId,
+            ],
+            'comment' => $comment,
+            'started' => $created,
         ];
 
-        return $this->api(self::REQUEST_POST, "/rest/api/2/issue/{$issueID}/worklog?adjustEstimate=auto", $params);
+        $worklogResponse = $this->api(self::REQUEST_GET, "/rest/api/2/issue/{$issueID}/worklog");
+        $workLogResult = $worklogResponse->getResult();
+
+        if (isset($workLogResult['worklogs'])) {
+            foreach ($workLogResult['worklogs'] as $workLog) {
+                if ($workLog['author']['accountId'] === $accountId) {
+                    $params = ['timeSpentSeconds' => $seconds];
+                    return $this->api(self::REQUEST_PUT, "/rest/api/2/issue/{$issueID}/worklog/{$workLog['id']}?adjustEstimate=auto", $params);
+                }
+            }
+        }
+
+        $result = $this->api(self::REQUEST_POST, "/rest/api/2/issue/{$issueID}/worklog?adjustEstimate=auto", $params);
+
+        return $result;
     }
 }

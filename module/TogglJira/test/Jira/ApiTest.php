@@ -14,7 +14,7 @@ class ApiTest extends TestCase
     /**
      * @return void
      */
-    public function testaddWorkLogEntry(): void
+    public function testAddWorkLogEntry(): void
     {
         $endPoint = 'http://www.example.com';
 
@@ -25,12 +25,12 @@ class ApiTest extends TestCase
                 Api::REQUEST_POST,
                 "/rest/api/2/issue/DVA-42/worklog?adjustEstimate=auto",
                 [
+                    'timeSpentSeconds' => 9001,
                     'author' => [
                         'accountId' => 'D-Va',
                     ],
-                    'created' => '2017-04-15T23:35:00+02:00',
-                    'timeSpentSeconds' => 9001,
-                    'comment' => 'Nerf this!'
+                    'comment' => 'Nerf this!',
+                    'started' => '2017-04-15T23:35:00+02:00',
                 ],
                 'http://www.example.com',
                 $authenticationMock,
@@ -38,6 +38,66 @@ class ApiTest extends TestCase
                 false
             )
         ->andReturn('{}');
+
+        $clientMock->shouldReceive('sendRequest')
+            ->with(
+                Api::REQUEST_GET,
+                "/rest/api/2/issue/DVA-42/worklog",
+                [],
+                'http://www.example.com',
+                $authenticationMock,
+                false,
+                false
+            )
+        ->andReturn('{}');
+
+        $api = new Api($endPoint, $authenticationMock, $clientMock);
+
+        $result = $api->addWorkLogEntry(
+            'DVA-42',
+            9001,
+            'D-Va',
+            'Nerf this!',
+            '2017-04-15T23:35:00+02:00'
+        );
+
+        $this->assertInstanceOf(Result::class, $result);
+    }
+
+    /**
+     * @return void
+     */
+    public function testUpdateWorkLogEntry(): void
+    {
+        $endPoint = 'http://www.example.com';
+
+        $authenticationMock = \Mockery::mock(AuthenticationInterface::class);
+        $clientMock = \Mockery::mock(ClientInterface::class);
+        $clientMock->shouldReceive('sendRequest')
+            ->with(
+                Api::REQUEST_PUT,
+                "/rest/api/2/issue/DVA-42/worklog/42?adjustEstimate=auto",
+                [
+                    'timeSpentSeconds' => 9001,
+                ],
+                'http://www.example.com',
+                $authenticationMock,
+                false,
+                false
+            )
+            ->andReturn('{}');
+
+        $clientMock->shouldReceive('sendRequest')
+            ->with(
+                Api::REQUEST_GET,
+                "/rest/api/2/issue/DVA-42/worklog",
+                [],
+                'http://www.example.com',
+                $authenticationMock,
+                false,
+                false
+            )
+            ->andReturn('{"worklogs": [{"id": 42, "author":{"accountId":"D-Va"}}]}');
 
         $api = new Api($endPoint, $authenticationMock, $clientMock);
 
