@@ -84,7 +84,7 @@ class SyncService implements LoggerAwareInterface
                     $workLogEntry->getTimeSpent(),
                     $this->userID,
                     $workLogEntry->getComment(),
-                    $workLogEntry->getSpentOn()->format(DATE_ATOM)
+                    $workLogEntry->getSpentOn()->format('Y-m-d\TH:i:s.vO')
                 );
 
                 $this->logger->info("Added worklog entry for issue {$workLogEntry->getIssueID()}");
@@ -107,7 +107,7 @@ class SyncService implements LoggerAwareInterface
             'issueID' => explode(' ', $timeEntry['description'])[0],
             'timeSpent' => $timeEntry['duration'],
             'comment' => $timeEntry['description'],
-            'spentOn' => $timeEntry['at']
+            'spentOn' => $timeEntry['start']
         ];
 
         if (strpos($data['issueID'], '-') === false) {

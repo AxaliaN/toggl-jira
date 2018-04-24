@@ -64,20 +64,20 @@ class SyncServiceTest extends TestCase
      */
     public function testSync(): void
     {
-        $dateTime = '2017-04-15T23:35:00+02:00';
+        $dateTime = '2017-04-15T23:35:00.000+0200';
 
         $timeEntries = [
             [
                 'description' => 'SLR-76 Soldier 76',
                 'duration' => 76,
                 'comment' => 'Soldier 76, reporting for duty',
-                'at' => '2018-02-15'
+                'start' => '2018-02-15'
             ],
             [
                 'description' => 'DVA-76 D-Va',
                 'duration' => 42,
                 'comment' => 'Nerf this!',
-                'at' => '2018-02-15'
+                'start' => '2018-02-15'
             ],
         ];
 
@@ -145,13 +145,13 @@ class SyncServiceTest extends TestCase
                 'description' => 'SLR76 Soldier 76',
                 'duration' => 76,
                 'comment' => 'Soldier 76, not reporting for duty',
-                'at' => '2018-02-15'
+                'start' => '2018-02-15'
             ],
             [
                 'description' => 'SLR-76 Soldier 76',
                 'duration' => -1,
                 'comment' => 'Soldier 76, not reporting for duty',
-                'at' => '2018-02-15'
+                'start' => '2018-02-15'
             ],
         ];
 
@@ -176,20 +176,20 @@ class SyncServiceTest extends TestCase
      */
     public function testSyncJiraException(): void
     {
-        $dateTime = '2017-04-15T23:35:00+02:00';
+        $dateTime = '2017-04-15T23:35:00.000+0200';
 
         $timeEntries = [
             [
                 'description' => 'SLR-76 Soldier 76',
                 'duration' => 76,
                 'comment' => 'Soldier 76, reporting for duty',
-                'at' => '2018-02-15'
+                'start' => '2018-02-15'
             ],
             [
                 'description' => 'DVA-76 D-Va',
                 'duration' => 42,
                 'comment' => 'Nerf this!',
-                'at' => '2018-02-15'
+                'start' => '2018-02-15'
             ],
         ];
 
