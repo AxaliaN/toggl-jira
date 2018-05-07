@@ -9,6 +9,7 @@ use Mockery\Exception;
 use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 use TogglJira\Entity\WorkLogEntry;
 use TogglJira\Hydrator\WorkLogHydrator;
 use TogglJira\Jira\Api;
@@ -93,6 +94,12 @@ class SyncServiceTest extends TestCase
 
         $this->hydratorMock->shouldReceive('hydrate')->andReturn($workLogEntry);
 
+        $user = [
+            'accountId' => 'D-Va'
+        ];
+
+        $this->apiMock->shouldReceive('getUser')->andReturn($user);
+
         $this->apiMock->shouldReceive('addWorkLogEntry')->with(
             $workLogEntry->getIssueID(),
             $workLogEntry->getTimeSpent(),
@@ -101,13 +108,25 @@ class SyncServiceTest extends TestCase
             $dateTime
         );
 
-        $this->loggerMock
-            ->shouldReceive('info')
-            ->with("Found time entry for user story {$workLogEntry->getIssueID()}");
+        $this->apiMock->shouldReceive('addWorkLogEntry')->with(
+            $workLogEntry->getIssueID(),
+            $workLogEntry->getTimeSpent() * 2,
+            'D-Va',
+            $workLogEntry->getComment(),
+            $dateTime
+        );
 
         $this->loggerMock
             ->shouldReceive('info')
-            ->with("Added worklog entry for issue {$workLogEntry->getIssueID()}");
+            ->with("Found time entry for issue {$workLogEntry->getIssueID()}");
+
+        $this->loggerMock
+            ->shouldReceive('info')
+            ->with("Saved worklog entry for issue {$workLogEntry->getIssueID()}");
+
+        $this->loggerMock
+            ->shouldReceive('info')
+            ->with("Added time spent for issue {$workLogEntry->getIssueID()}");
 
         $this->loggerMock->shouldReceive('info')->with('All done for today, time to go home!');
 
@@ -121,6 +140,12 @@ class SyncServiceTest extends TestCase
     public function testExceptionOnTogglError(): void
     {
         $dateTime = '2017-04-15T23:35:00+02:00';
+
+        $user = [
+            'accountId' => 'D-Va'
+        ];
+
+        $this->apiMock->shouldReceive('getUser')->andReturn($user);
 
         $this->togglClientMock->shouldReceive('getTimeEntries')
             ->with(['start_date' => $dateTime])
@@ -159,6 +184,12 @@ class SyncServiceTest extends TestCase
             ->with(['start_date' => $dateTime])
             ->andReturn($timeEntries);
 
+        $user = [
+            'accountId' => 'D-Va'
+        ];
+
+        $this->apiMock->shouldReceive('getUser')->andReturn($user);
+
         $this->loggerMock->shouldReceive('warning'
         )->with('Could not parse issue string, cannot link to Jira');
 
@@ -177,6 +208,12 @@ class SyncServiceTest extends TestCase
     public function testSyncJiraException(): void
     {
         $dateTime = '2017-04-15T23:35:00.000+0200';
+
+        $user = [
+            'accountId' => 'D-Va'
+        ];
+
+        $this->apiMock->shouldReceive('getUser')->andReturn($user);
 
         $timeEntries = [
             [
@@ -207,7 +244,7 @@ class SyncServiceTest extends TestCase
 
         $this->apiMock->shouldReceive('addWorkLogEntry')->with(
             $workLogEntry->getIssueID(),
-            $workLogEntry->getTimeSpent(),
+            $workLogEntry->getTimeSpent() * 2,
             'D-Va',
             $workLogEntry->getComment(),
             $dateTime
@@ -215,13 +252,30 @@ class SyncServiceTest extends TestCase
 
         $this->loggerMock
             ->shouldReceive('info')
-            ->with("Found time entry for user story {$workLogEntry->getIssueID()}");
+            ->with("Found time entry for issue {$workLogEntry->getIssueID()}");
 
         $this->loggerMock
             ->shouldReceive('error')
             ->with("Could not add worklog entry: Nerf this!", \Mockery::any());
 
+        $this->loggerMock
+            ->shouldReceive('info')
+            ->with("Added time spent for issue {$workLogEntry->getIssueID()}");
+
         $this->loggerMock->shouldReceive('info')->with('All done for today, time to go home!');
+
+        $this->service->sync($dateTime);
+    }
+
+    /**
+     * @expectedException RuntimeException
+     * @expectedExceptionMessage User with username D-Va not found
+     * @return void
+     */
+    public function testExceptionThrownOnUserNotFound(): void
+    {
+        $dateTime = '2017-04-15T23:35:00.000+0200';
+        $this->apiMock->shouldReceive('getUser')->andReturn([]);
 
         $this->service->sync($dateTime);
     }
