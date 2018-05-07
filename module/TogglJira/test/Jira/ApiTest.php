@@ -97,7 +97,7 @@ class ApiTest extends TestCase
                 false,
                 false
             )
-            ->andReturn('{"worklogs": [{"id": 42, "author":{"accountId":"D-Va"}}]}');
+            ->andReturn('{"worklogs": [{"id": 42, "started": "2018-01-01", "author":{"accountId":"D-Va"}}]}');
 
         $api = new Api($endPoint, $authenticationMock, $clientMock);
 
