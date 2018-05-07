@@ -97,7 +97,7 @@ class ApiTest extends TestCase
                 false,
                 false
             )
-            ->andReturn('{"worklogs": [{"id": 42, "started": "2018-01-01", "author":{"accountId":"D-Va"}}]}');
+            ->andReturn('{"worklogs": [{"id": 42, "started": "2017-04-15", "author":{"accountId":"D-Va"}}]}');
 
         $api = new Api($endPoint, $authenticationMock, $clientMock);
 
@@ -110,5 +110,35 @@ class ApiTest extends TestCase
         );
 
         $this->assertInstanceOf(Result::class, $result);
+    }
+
+    /**
+     * @return void
+     */
+    public function testGetUser(): void
+    {
+        $endPoint = 'http://www.example.com';
+
+        $authenticationMock = \Mockery::mock(AuthenticationInterface::class);
+        $clientMock = \Mockery::mock(ClientInterface::class);
+        $clientMock->shouldReceive('sendRequest')
+            ->with(
+                Api::REQUEST_GET,
+                "/rest/api/2/user",
+                [
+                    'username' => 'D-Va',
+                ],
+                'http://www.example.com',
+                $authenticationMock,
+                false,
+                false
+            )
+            ->andReturn('{"accountId":"42"}');
+
+        $api = new Api($endPoint, $authenticationMock, $clientMock);
+
+        $user = $api->getUser('D-Va');
+
+        $this->assertEquals('42', $user['accountId']);
     }
 }

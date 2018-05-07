@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 namespace TogglJira\Service;
 
+use Exception;
 use GuzzleHttp\Command\Guzzle\GuzzleClient;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
+use RuntimeException;
 use TogglJira\Entity\WorkLogEntry;
 use TogglJira\Hydrator\WorkLogHydrator;
 use TogglJira\Jira\Api;
@@ -48,7 +50,7 @@ class SyncService implements LoggerAwareInterface
     }
 
     /**
-     * @throws \Exception
+     * @throws RuntimeException
      * @return void
      */
     public function sync(string $startDate): void
@@ -56,7 +58,7 @@ class SyncService implements LoggerAwareInterface
         $user = $this->api->getUser($this->username);
 
         if (!$user) {
-            throw new \Exception("User with username {$this->username} not found");
+            throw new RuntimeException("User with username {$this->username} not found");
         }
 
         $workLogEntries = [];
@@ -64,7 +66,7 @@ class SyncService implements LoggerAwareInterface
         try {
             /** @var array $timeEntries */
             $timeEntries = $this->togglClient->getTimeEntries(['start_date' => $startDate]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error(
                 "Failed to get time entries from Toggl: {$e->getMessage()}",
                 ['exception' => $e]
@@ -87,14 +89,14 @@ class SyncService implements LoggerAwareInterface
 
                 $workLogEntries[$existingKey]->setTimeSpent($timeSpent);
 
-                $this->logger->info("Added time spent for user story {$workLogEntry->getIssueID()}");
+                $this->logger->info("Added time spent for issue {$workLogEntry->getIssueID()}");
 
                 continue;
             }
 
             $workLogEntries[$existingKey] = $workLogEntry;
 
-            $this->logger->info("Found time entry for user story {$workLogEntry->getIssueID()}");
+            $this->logger->info("Found time entry for issue {$workLogEntry->getIssueID()}");
         }
 
         /** @var WorkLogEntry $workLogEntry */
@@ -109,7 +111,7 @@ class SyncService implements LoggerAwareInterface
                 );
 
                 $this->logger->info("Saved worklog entry for issue {$workLogEntry->getIssueID()}");
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->logger->error("Could not add worklog entry: {$e->getMessage()}", ['exception' => $e]);
             }
         }
@@ -120,7 +122,7 @@ class SyncService implements LoggerAwareInterface
     /**
      * @param array $timeEntry
      * @return WorkLogEntry|null
-     * @throws \Exception
+     * @throws Exception
      */
     private function parseTimeEntry(array $timeEntry): ?WorkLogEntry
     {
