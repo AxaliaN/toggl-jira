@@ -18,10 +18,12 @@ class SyncService implements LoggerAwareInterface
      * @var Api
      */
     private $api;
+
     /**
      * @var GuzzleClient
      */
     private $togglClient;
+
     /**
      * @var WorkLogHydrator
      */
@@ -29,20 +31,20 @@ class SyncService implements LoggerAwareInterface
     /**
      * @var string
      */
-    private $userID;
+    private $username;
 
     /**
      * @param Api $api
      * @param GuzzleClient $togglClient
      * @param WorkLogHydrator $workLogHydrator
-     * @param string $userID
+     * @param string $username
      */
-    public function __construct(Api $api, GuzzleClient $togglClient, WorkLogHydrator $workLogHydrator, string $userID)
+    public function __construct(Api $api, GuzzleClient $togglClient, WorkLogHydrator $workLogHydrator, string $username)
     {
         $this->api = $api;
         $this->togglClient = $togglClient;
         $this->workLogHydrator = $workLogHydrator;
-        $this->userID = $userID;
+        $this->username = $username;
     }
 
     /**
@@ -51,6 +53,12 @@ class SyncService implements LoggerAwareInterface
      */
     public function sync(string $startDate): void
     {
+        $user = $this->api->getUser($this->username);
+
+        if (!$user) {
+            throw new \Exception("User with username {$this->username} not found");
+        }
+
         $workLogEntries = [];
 
         try {
@@ -71,7 +79,20 @@ class SyncService implements LoggerAwareInterface
                 continue;
             }
 
-            $workLogEntries[] = $workLogEntry;
+            $existingKey = $workLogEntry->getIssueID() . '-' . $workLogEntry->getSpentOn()->format('d-m-Y');
+
+            if (isset($workLogEntries[$existingKey])) {
+                $timeSpent = $workLogEntries[$existingKey]->getTimeSpent();
+                $timeSpent += $workLogEntry->getTimeSpent();
+
+                $workLogEntries[$existingKey]->setTimeSpent($timeSpent);
+
+                $this->logger->info("Added time spent for user story {$workLogEntry->getIssueID()}");
+
+                continue;
+            }
+
+            $workLogEntries[$existingKey] = $workLogEntry;
 
             $this->logger->info("Found time entry for user story {$workLogEntry->getIssueID()}");
         }
@@ -82,12 +103,12 @@ class SyncService implements LoggerAwareInterface
                 $this->api->addWorkLogEntry(
                     $workLogEntry->getIssueID(),
                     $workLogEntry->getTimeSpent(),
-                    $this->userID,
+                    $user['accountId'],
                     $workLogEntry->getComment(),
                     $workLogEntry->getSpentOn()->format('Y-m-d\TH:i:s.vO')
                 );
 
-                $this->logger->info("Added worklog entry for issue {$workLogEntry->getIssueID()}");
+                $this->logger->info("Saved worklog entry for issue {$workLogEntry->getIssueID()}");
             } catch (\Exception $e) {
                 $this->logger->error("Could not add worklog entry: {$e->getMessage()}", ['exception' => $e]);
             }
