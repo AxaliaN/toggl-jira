@@ -5,7 +5,7 @@ namespace TogglJiraTest\Service;
 
 use AJT\Toggl\TogglClient;
 use DateTimeImmutable;
-use Mockery\Exception;
+use GuzzleHttp\Command\Result;
 use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -82,9 +82,11 @@ class SyncServiceTest extends TestCase
             ],
         ];
 
+        $result = new Result($timeEntries);
+
         $this->togglClientMock->shouldReceive('getTimeEntries')
             ->with(['start_date' => $dateTime])
-            ->andReturn($timeEntries);
+            ->andReturn($result);
 
         $workLogEntry = new WorkLogEntry();
         $workLogEntry->setIssueID('SLR-76');
@@ -180,9 +182,11 @@ class SyncServiceTest extends TestCase
             ],
         ];
 
+        $result = new Result($timeEntries);
+
         $this->togglClientMock->shouldReceive('getTimeEntries')
             ->with(['start_date' => $dateTime])
-            ->andReturn($timeEntries);
+            ->andReturn($result);
 
         $user = [
             'accountId' => 'D-Va'
@@ -230,9 +234,11 @@ class SyncServiceTest extends TestCase
             ],
         ];
 
+        $result = new Result($timeEntries);
+        
         $this->togglClientMock->shouldReceive('getTimeEntries')
             ->with(['start_date' => $dateTime])
-            ->andReturn($timeEntries);
+            ->andReturn($result);
 
         $workLogEntry = new WorkLogEntry();
         $workLogEntry->setIssueID('SLR-76');
