@@ -50,29 +50,59 @@ class SyncService implements LoggerAwareInterface
     }
 
     /**
-     * @throws RuntimeException
+     * @param string $startDate
      * @return void
+     * @throws Exception
      */
     public function sync(string $startDate): void
     {
         $user = $this->api->getUser($this->username);
 
-        if (!$user) {
+        if (!isset($user['accountId'])) {
             throw new RuntimeException("User with username {$this->username} not found");
         }
 
-        $workLogEntries = [];
+        $timeEntries = $this->getTimeEntries($startDate);
 
+        if (!$timeEntries) {
+            return;
+        }
+
+
+        $workLogEntries = $this->parseTimeEntries($timeEntries);
+
+        $this->addWorkLogsToApi($workLogEntries, $user);
+
+        $this->logger->info('All done for today, time to go home!');
+    }
+
+    /**
+     * @param string $startDate
+     * @return array|null
+     */
+    private function getTimeEntries(string $startDate): ?array
+    {
         try {
             /** @var array $timeEntries */
-            $timeEntries = $this->togglClient->getTimeEntries(['start_date' => $startDate]);
+            return $this->togglClient->getTimeEntries(['start_date' => $startDate]);
         } catch (Exception $e) {
             $this->logger->error(
                 "Failed to get time entries from Toggl: {$e->getMessage()}",
                 ['exception' => $e]
             );
-            return;
+
+            return null;
         }
+    }
+
+    /**
+     * @param array $timeEntries
+     * @return array
+     * @throws Exception
+     */
+    private function parseTimeEntries(array $timeEntries): array
+    {
+        $workLogEntries = [];
 
         foreach ($timeEntries as $timeEntry) {
             $workLogEntry = $this->parseTimeEntry($timeEntry);
@@ -84,13 +114,7 @@ class SyncService implements LoggerAwareInterface
             $existingKey = $workLogEntry->getIssueID() . '-' . $workLogEntry->getSpentOn()->format('d-m-Y');
 
             if (isset($workLogEntries[$existingKey])) {
-                $timeSpent = $workLogEntries[$existingKey]->getTimeSpent();
-                $timeSpent += $workLogEntry->getTimeSpent();
-
-                $workLogEntries[$existingKey]->setTimeSpent($timeSpent);
-
-                $this->logger->info("Added time spent for issue {$workLogEntry->getIssueID()}");
-
+                $this->addTimeToExistingTimeEntry($workLogEntries[$existingKey], $workLogEntry);
                 continue;
             }
 
@@ -99,24 +123,7 @@ class SyncService implements LoggerAwareInterface
             $this->logger->info("Found time entry for issue {$workLogEntry->getIssueID()}");
         }
 
-        /** @var WorkLogEntry $workLogEntry */
-        foreach ($workLogEntries as $workLogEntry) {
-            try {
-                $this->api->addWorkLogEntry(
-                    $workLogEntry->getIssueID(),
-                    $workLogEntry->getTimeSpent(),
-                    $user['accountId'],
-                    $workLogEntry->getComment(),
-                    $workLogEntry->getSpentOn()->format('Y-m-d\TH:i:s.vO')
-                );
-
-                $this->logger->info("Saved worklog entry for issue {$workLogEntry->getIssueID()}");
-            } catch (Exception $e) {
-                $this->logger->error("Could not add worklog entry: {$e->getMessage()}", ['exception' => $e]);
-            }
-        }
-
-        $this->logger->info('All done for today, time to go home!');
+        return $workLogEntries;
     }
 
     /**
@@ -144,5 +151,47 @@ class SyncService implements LoggerAwareInterface
         }
 
         return $this->workLogHydrator->hydrate($data, new WorkLogEntry());
+    }
+
+    /**
+     * @param $existingWorkLog
+     * @param $newWorkLog
+     * @return WorkLogEntry
+     */
+    private function addTimeToExistingTimeEntry(WorkLogEntry $existingWorkLog, WorkLogEntry $newWorkLog): WorkLogEntry
+    {
+        $timeSpent = $existingWorkLog->getTimeSpent();
+        $timeSpent += $newWorkLog->getTimeSpent();
+
+        $existingWorkLog->setTimeSpent($timeSpent);
+
+        $this->logger->info("Added time spent for issue {$newWorkLog->getIssueID()}");
+
+        return $existingWorkLog;
+    }
+
+    /**
+     * @param array $workLogEntries
+     * @param array $user
+     * @return void
+     */
+    private function addWorkLogsToApi(array $workLogEntries, array $user): void
+    {
+        /** @var WorkLogEntry $workLogEntry */
+        foreach ($workLogEntries as $workLogEntry) {
+            try {
+                $this->api->addWorkLogEntry(
+                    $workLogEntry->getIssueID(),
+                    $workLogEntry->getTimeSpent(),
+                    $user['accountId'],
+                    $workLogEntry->getComment(),
+                    $workLogEntry->getSpentOn()->format('Y-m-d\TH:i:s.vO')
+                );
+
+                $this->logger->info("Saved worklog entry for issue {$workLogEntry->getIssueID()}");
+            } catch (Exception $e) {
+                $this->logger->error("Could not add worklog entry: {$e->getMessage()}", ['exception' => $e]);
+            }
+        }
     }
 }
