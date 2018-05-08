@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace TogglJira;
 
+use Zend\Console\Console;
 use Zend\Mvc\Application as MvcApplication;
 use ZF\Console\Application as ConsoleApplication;
-use Zend\Console\Console;
 use ZF\Console\Dispatcher;
 
 class Bootstrap
