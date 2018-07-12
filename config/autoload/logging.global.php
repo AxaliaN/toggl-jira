@@ -1,5 +1,6 @@
 <?php
 
+use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
 return [
@@ -9,7 +10,7 @@ return [
                 'name' => 'event',
                 'handlers' => [
                     'default' => [
-                        'name' => 'Monolog\Handler\StreamHandler',
+                        'name' => StreamHandler::class,
                         'options' => [
                             'stream' => 'php://stdout',
                             'level' => Logger::DEBUG,

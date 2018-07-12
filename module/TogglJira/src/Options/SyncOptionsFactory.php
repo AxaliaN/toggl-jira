@@ -17,14 +17,18 @@ class SyncOptionsFactory implements FactoryInterface
         $reader = new Json();
         $config = $reader->fromFile(__DIR__ . '/../../../../config.json');
 
-        if (
-        (!isset($config['jiraUsername']) || empty($config['jiraUsername'])) ||
+        if ((!isset($config['jiraUsername']) || empty($config['jiraUsername'])) ||
         (!isset($config['jiraPassword']) || empty($config['jiraPassword'])) ||
         (!isset($config['togglApiKey']) || empty($config['togglApiKey'])) ||
         (!isset($config['jiraUrl']) || empty($config['jiraUrl']))
         ) {
             throw new \RuntimeException('Invalid config.json, please fill out everything except lastSync');
         }
+
+        $config['lastSync'] = new \DateTimeImmutable(
+            $config['lastSync']['date'],
+            new \DateTimeZone($config['lastSync']['timezone'])
+        );
 
         return new SyncOptions($config);
     }

@@ -24,15 +24,16 @@ class Api extends BaseApi
      * @param string $accountId
      * @param string $comment
      * @param string $created
+     * @param bool $overwrite
      * @return array|BaseApi\Result|false
-     * @throws \Exception
      */
     public function addWorkLogEntry(
         string $issueID,
         int $seconds,
         string $accountId,
         string $comment,
-        string $created
+        string $created,
+        bool $overwrite
     ) {
         $params = [
             'timeSpentSeconds' => $seconds,
@@ -55,8 +56,18 @@ class Api extends BaseApi
                 if ($startedDay === $workLogStartedDay &&
                     $workLog['author']['accountId'] === $accountId
                 ) {
-                    $params = ['timeSpentSeconds' => $seconds];
-                    return $this->api(self::REQUEST_PUT, "/rest/api/2/issue/{$issueID}/worklog/{$workLog['id']}?adjustEstimate=auto", $params);
+                    if (!$overwrite) {
+                        return $this->api(
+                            self::REQUEST_PUT,
+                            "/rest/api/2/issue/{$issueID}/worklog/{$workLog['id']}?adjustEstimate=auto",
+                            $params
+                        );
+                    }
+
+                    /**
+                     * When overwriting the worklogs, delete the existing worklogs first before recreating.
+                     */
+                    $this->api(self::REQUEST_DELETE, "/rest/api/2/issue/{$issueID}/worklog/{$workLog['id']}");
                 }
             }
         }

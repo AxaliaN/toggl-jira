@@ -8,7 +8,7 @@ use Zend\Stdlib\AbstractOptions;
 class SyncOptions extends AbstractOptions
 {
     /**
-     * @var string
+     * @var \DateTimeInterface
      */
     private $lastSync;
 
@@ -31,6 +31,13 @@ class SyncOptions extends AbstractOptions
      * @var string
      */
     private $jiraUrl;
+
+    public function __construct($options = null)
+    {
+        $this->lastSync = new \DateTimeImmutable('-1 day');
+
+        parent::__construct($options);
+    }
 
     /**
      * @return string
@@ -81,17 +88,17 @@ class SyncOptions extends AbstractOptions
     }
 
     /**
-     * @return string
+     * @return \DateTimeInterface
      */
-    public function getLastSync(): string
+    public function getLastSync(): \DateTimeInterface
     {
         return $this->lastSync;
     }
 
     /**
-     * @param string $lastSync
+     * @param \DateTimeInterface $lastSync
      */
-    public function setLastSync(string $lastSync = ''): void
+    public function setLastSync(\DateTimeInterface $lastSync): void
     {
         $this->lastSync = $lastSync;
     }

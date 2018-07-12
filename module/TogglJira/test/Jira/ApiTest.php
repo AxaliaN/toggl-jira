@@ -58,7 +58,8 @@ class ApiTest extends TestCase
             9001,
             'D-Va',
             'Nerf this!',
-            '2017-04-15T23:35:00+02:00'
+            '2017-04-15T23:35:00+02:00',
+            false
         );
 
         $this->assertInstanceOf(Result::class, $result);
@@ -79,6 +80,9 @@ class ApiTest extends TestCase
                 "/rest/api/2/issue/DVA-42/worklog/42?adjustEstimate=auto",
                 [
                     'timeSpentSeconds' => 9001,
+                    'author' => ['accountId' => 'D-Va'],
+                    'comment' => 'Nerf this!',
+                    'started' => '2017-04-15T23:35:00+02:00'
                 ],
                 'http://www.example.com',
                 $authenticationMock,
@@ -106,7 +110,8 @@ class ApiTest extends TestCase
             9001,
             'D-Va',
             'Nerf this!',
-            '2017-04-15T23:35:00+02:00'
+            '2017-04-15T23:35:00+02:00',
+            false
         );
 
         $this->assertInstanceOf(Result::class, $result);

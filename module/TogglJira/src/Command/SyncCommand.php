@@ -50,21 +50,24 @@ class SyncCommand implements CommandInterface, LoggerAwareInterface
      */
     public function execute(Request $request, AdapterInterface $console): int
     {
-        if ($this->syncOptions->getLastSync() === "") {
-            $this->syncOptions->setLastSync(
-                (new \DateTimeImmutable('-1 day'))->format(DATE_ATOM)
-            );
-        }
+        $reqStartDate = $request->getParam('startDate', null);
+        $reqEndDate = $request->getParam('endDate', null);
+        $startDate = $reqStartDate ? new \DateTimeImmutable($reqStartDate) : $this->syncOptions->getLastSync();
+        $endDate = $reqEndDate ? new \DateTimeImmutable($reqEndDate) : new \DateTimeImmutable('now');
+        $overwrite = (bool) $request->getParam('overwrite', false);
 
-        $this->logger->info("Syncing time entries since {$this->syncOptions->getLastSync()}");
-        $this->service->sync($this->syncOptions->getLastSync());
+        $this->logger->info(
+            'Syncing time entries',
+            ['lastSync' => $startDate->format(DATE_ATOM)]
+        );
 
-        $this->syncOptions->setLastSync((new \DateTimeImmutable())->format(DATE_ATOM));
+        $this->service->sync($startDate, $endDate, $overwrite);
+        $this->syncOptions->setLastSync($endDate);
 
         $this->writer->toFile('config.json', $this->syncOptions->toArray());
 
         $this->logger->info('Updated last sync time');
 
-        return 1;
+        return 0;
     }
 }

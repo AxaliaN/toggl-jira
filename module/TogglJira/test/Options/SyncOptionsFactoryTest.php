@@ -15,12 +15,15 @@ class SyncOptionsFactoryTest extends BaseContainerTest
      */
     public function testInvoke(): void
     {
-        if (file_exists(__DIR__ . '/../../../../config.json')) {
-            rename(__DIR__ . '/../../../../config.json', __DIR__ . '/../../../../config.json.bak');
+        if (file_exists(__DIR__ . '/../../../../config.phpunit.json')) {
+            rename(__DIR__ . '/../../../../config.phpunit.json', __DIR__ . '/../../../../config.phpunit.json.bak');
         }
 
-        file_put_contents(__DIR__ . '/../../../../config.json', '{
-            "lastSync": "2018-04-03T10:10:55+02:00",
+        file_put_contents(__DIR__ . '/../../../../config.phpunit.json', '{
+            "lastSync": {
+                "date": "2018-04-03T10:10:55+02:00",
+                "timezone": "Europe/Amsterdam"
+            },
             "jiraUrl": "https://jira.atlassian.net",
             "jiraUsername": "foo",
             "jiraPassword": "bar",
@@ -33,38 +36,14 @@ class SyncOptionsFactoryTest extends BaseContainerTest
         $this->assertInstanceOf(SyncOptions::class, $instance);
     }
 
-    /**
-     * @return void
-     * @throws \Interop\Container\Exception\ContainerException
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Invalid config.json, please fill out everything except lastSync
-     */
-    public function testInvokeThrowsException(): void
-    {
-        if (file_exists(__DIR__ . '/../../../../config.json')) {
-            rename(__DIR__ . '/../../../../config.json', __DIR__ . '/../../../../config.json.bak');
-        }
-
-        file_put_contents(__DIR__ . '/../../../../config.json', '{
-            "lastSync": "",
-            "jiraUrl": "",
-            "jiraUsername": "",
-            "jiraPassword": "",
-            "togglApiKey": ""
-        }');
-
-        $factory = new SyncOptionsFactory();
-        $factory->__invoke($this->getContainer(), SyncOptions::class);
-    }
-
     public function tearDown()/* The :void return type declaration that should be here would cause a BC issue */
     {
         parent::tearDown();
 
-        \unlink(__DIR__ . '/../../../../config.json');
+        \unlink(__DIR__ . '/../../../../config.phpunit.json');
 
-        if (\file_exists(__DIR__ . '/../../../../config.json.bak')) {
-            \rename(__DIR__ . '/../../../../config.json.bak', __DIR__ . '/../../../../config.json');
+        if (\file_exists(__DIR__ . '/../../../../config.phpunit.json.bak')) {
+            \rename(__DIR__ . '/../../../../config.phpunit.json.bak', __DIR__ . '/../../../../config.phpunit.json');
         }
     }
 }
