@@ -45,8 +45,7 @@ php bin/toggljira.php sync --startDate=2018-01-01 --endDate=2018-02-01
 
 ### Overwriting existing worklogs instead of combining (merging)
 
-This will sync all worklogs starting from 1 january 2018.
-It will overwrite existing worklogs.
+This will sync all worklogs starting from 1 january 2018 to 1 february 2018 and it will overwrite existing worklogs.
 ```php 
 php bin/toggljira.php sync --startDate=2018-01-01 --endDate=2018-02-01 --overwrite=true
 ```

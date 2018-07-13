@@ -15,11 +15,11 @@ class SyncOptionsFactoryTest extends BaseContainerTest
      */
     public function testInvoke(): void
     {
-        if (file_exists(__DIR__ . '/../../../../config.phpunit.json')) {
-            rename(__DIR__ . '/../../../../config.phpunit.json', __DIR__ . '/../../../../config.phpunit.json.bak');
+        if (file_exists(__DIR__ . '/../../../../config.json')) {
+            rename(__DIR__ . '/../../../../config.json', __DIR__ . '/../../../../config.json.bak');
         }
 
-        file_put_contents(__DIR__ . '/../../../../config.phpunit.json', '{
+        file_put_contents(__DIR__ . '/../../../../config.json', '{
             "lastSync": {
                 "date": "2018-04-03T10:10:55+02:00",
                 "timezone": "Europe/Amsterdam"
@@ -40,10 +40,10 @@ class SyncOptionsFactoryTest extends BaseContainerTest
     {
         parent::tearDown();
 
-        \unlink(__DIR__ . '/../../../../config.phpunit.json');
+        \unlink(__DIR__ . '/../../../../config.json');
 
-        if (\file_exists(__DIR__ . '/../../../../config.phpunit.json.bak')) {
-            \rename(__DIR__ . '/../../../../config.phpunit.json.bak', __DIR__ . '/../../../../config.phpunit.json');
+        if (\file_exists(__DIR__ . '/../../../../config.json.bak')) {
+            \rename(__DIR__ . '/../../../../config.json.bak', __DIR__ . '/../../../../config.json');
         }
     }
 }
