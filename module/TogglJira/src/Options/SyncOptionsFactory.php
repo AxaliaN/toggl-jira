@@ -25,10 +25,12 @@ class SyncOptionsFactory implements FactoryInterface
             throw new \RuntimeException('Invalid config.json, please fill out everything except lastSync');
         }
 
-        $config['lastSync'] = new \DateTimeImmutable(
-            $config['lastSync']['date'],
-            new \DateTimeZone($config['lastSync']['timezone'])
-        );
+        if (isset($config['lastSync']['date']) && isset($config['lastSync']['timezone'])) {
+            $config['lastSync'] = new \DateTimeImmutable(
+                $config['lastSync']['date'],
+                new \DateTimeZone($config['lastSync']['timezone'])
+            );
+        }
 
         return new SyncOptions($config);
     }
