@@ -215,13 +215,4 @@ class SyncService implements LoggerAwareInterface
             }
         }
     }
-
-    /**
-     * @param \DateTimeInterface $startDate
-     * @return \DateTimeInterface
-     */
-    private function createStartDateFromTomorrow(\DateTimeInterface $startDate): \DateTimeInterface
-    {
-        return (new \DateTime($startDate->format(DATE_ATOM)))->modify('+1 day');
-    }
 }
