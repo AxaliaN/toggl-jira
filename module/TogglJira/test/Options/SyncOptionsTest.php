@@ -14,7 +14,7 @@ class SyncOptionsTest extends TestCase
     public function testAccessors(): void
     {
         $data = [
-            'lastSync' => '2017-04-15T23:35:00+02:00',
+            'lastSync' => new \DateTimeImmutable('2017-04-15T23:35:00+02:00'),
             'jiraUsername' => 'foo',
             'jiraPassword' => 'bar',
             'togglApiKey' => 'foz',
@@ -36,7 +36,7 @@ class SyncOptionsTest extends TestCase
     public function testToArray(): void
     {
         $data = [
-            'lastSync' => '2017-04-15T23:35:00+02:00',
+            'lastSync' => new \DateTimeImmutable('2017-04-15T23:35:00+02:00'),
             'jiraUsername' => 'foo',
             'jiraPassword' => 'bar',
             'togglApiKey' => 'foz',

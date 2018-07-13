@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace TogglJira\Service;
 
+use AJT\Toggl\TogglClient;
 use Exception;
 use GuzzleHttp\Command\Guzzle\GuzzleClient;
 use Psr\Log\LoggerAwareInterface;
@@ -22,7 +23,7 @@ class SyncService implements LoggerAwareInterface
     private $api;
 
     /**
-     * @var GuzzleClient
+     * @var TogglClient
      */
     private $togglClient;
 
@@ -50,11 +51,13 @@ class SyncService implements LoggerAwareInterface
     }
 
     /**
-     * @param string $startDate
+     * @param \DateTimeInterface $startDate
+     * @param \DateTimeInterface $endDate
+     * @param bool $overwrite
      * @return void
      * @throws Exception
      */
-    public function sync(string $startDate): void
+    public function sync(\DateTimeInterface $startDate, \DateTimeInterface $endDate, bool $overwrite): void
     {
         $user = $this->api->getUser($this->username);
 
@@ -62,32 +65,39 @@ class SyncService implements LoggerAwareInterface
             throw new RuntimeException("User with username {$this->username} not found");
         }
 
-        $timeEntries = $this->getTimeEntries($startDate);
+        while ($startDate < $endDate) {
+            $timeEntries = $this->getTimeEntries($startDate, $endDate);
+            if (!$timeEntries) {
+                $startDate = $this->createStartDateFromTomorrow($startDate);
+                continue;
+            }
 
-        if (!$timeEntries) {
-            return;
+            $this->addWorkLogsToApi($this->parseTimeEntries($timeEntries), $user, $overwrite);
+
+            $startDate = $this->createStartDateFromTomorrow($startDate);
         }
-
-
-        $workLogEntries = $this->parseTimeEntries($timeEntries);
-
-        $this->addWorkLogsToApi($workLogEntries, $user);
 
         $this->logger->info('All done for today, time to go home!');
     }
 
     /**
-     * @param string $startDate
+     * @param \DateTimeInterface $startDate
+     * @param \DateTimeInterface $endDate
      * @return array|null
      */
-    private function getTimeEntries(string $startDate): ?array
+    private function getTimeEntries(\DateTimeInterface $startDate, \DateTimeInterface $endDate): ?array
     {
         try {
             /** @var array $timeEntries */
-            return $this->togglClient->getTimeEntries(['start_date' => $startDate])->toArray();
+            return $this->togglClient->getTimeEntries(
+                [
+                    'start_date' => $startDate->format(DATE_ATOM),
+                    'end_date' => $endDate->format(DATE_ATOM),
+                ]
+            )->toArray();
         } catch (Exception $e) {
             $this->logger->error(
-                "Failed to get time entries from Toggl: {$e->getMessage()}",
+                'Failed to get time entries from Toggl',
                 ['exception' => $e]
             );
 
@@ -111,7 +121,7 @@ class SyncService implements LoggerAwareInterface
                 continue;
             }
 
-            $existingKey = $workLogEntry->getIssueID() . '-' . $workLogEntry->getSpentOn()->format('d-m-Y');
+            $existingKey = md5($workLogEntry->getIssueID() . '-' . $workLogEntry->getSpentOn()->format('Y-m-d'));
 
             if (isset($workLogEntries[$existingKey])) {
                 $this->addTimeToExistingTimeEntry($workLogEntries[$existingKey], $workLogEntry);
@@ -120,7 +130,11 @@ class SyncService implements LoggerAwareInterface
 
             $workLogEntries[$existingKey] = $workLogEntry;
 
-            $this->logger->info("Found time entry for issue {$workLogEntry->getIssueID()}");
+            $this->logger->info('Found time entry for issue', [
+                'issueID' => $workLogEntry->getIssueID(),
+                'spentOn' => $workLogEntry->getSpentOn()->format('Y-m-d'),
+                'timeSpent' => round($workLogEntry->getTimeSpent() / 60 / 60, 2) . ' hours',
+            ]);
         }
 
         return $workLogEntries;
@@ -146,7 +160,9 @@ class SyncService implements LoggerAwareInterface
         }
 
         if ($data['timeSpent'] < 0) {
-            $this->logger->info("0 seconds, or timer still running for {$data['issueID']}, skipping");
+            $this->logger->info('0 seconds, or timer still running, skipping', [
+                'issueID' => $data['issueID']
+            ]);
             return null;
         }
 
@@ -164,8 +180,13 @@ class SyncService implements LoggerAwareInterface
         $timeSpent += $newWorkLog->getTimeSpent();
 
         $existingWorkLog->setTimeSpent($timeSpent);
+        $existingWorkLog->setComment($existingWorkLog->getComment() . "\n" . $newWorkLog->getComment());
 
-        $this->logger->info("Added time spent for issue {$newWorkLog->getIssueID()}");
+        $this->logger->info('Added time spent for issue', [
+            'issueID' => $newWorkLog->getIssueID(),
+            'spentOn' => $newWorkLog->getSpentOn()->format('Y-m-d'),
+            'timeSpent' => round($newWorkLog->getTimeSpent() / 60 / 60, 2) . ' hours',
+        ]);
 
         return $existingWorkLog;
     }
@@ -173,9 +194,10 @@ class SyncService implements LoggerAwareInterface
     /**
      * @param array $workLogEntries
      * @param array $user
+     * @param bool $overwrite
      * @return void
      */
-    private function addWorkLogsToApi(array $workLogEntries, array $user): void
+    private function addWorkLogsToApi(array $workLogEntries, array $user, bool $overwrite): void
     {
         /** @var WorkLogEntry $workLogEntry */
         foreach ($workLogEntries as $workLogEntry) {
@@ -185,13 +207,27 @@ class SyncService implements LoggerAwareInterface
                     $workLogEntry->getTimeSpent(),
                     $user['accountId'],
                     $workLogEntry->getComment(),
-                    $workLogEntry->getSpentOn()->format('Y-m-d\TH:i:s.vO')
+                    $workLogEntry->getSpentOn()->format('Y-m-d\TH:i:s.vO'),
+                    $overwrite
                 );
 
-                $this->logger->info("Saved worklog entry for issue {$workLogEntry->getIssueID()}");
+                $this->logger->info('Saved worklog entry', [
+                    'issueID' => $workLogEntry->getIssueID(),
+                    'spentOn' => $workLogEntry->getSpentOn()->format('Y-m-d'),
+                    'timeSpent' => round($workLogEntry->getTimeSpent() / 60 / 60, 2) . ' hours',
+                ]);
             } catch (Exception $e) {
-                $this->logger->error("Could not add worklog entry: {$e->getMessage()}", ['exception' => $e]);
+                $this->logger->error('Could not add worklog entry', ['exception' => $e]);
             }
         }
+    }
+
+    /**
+     * @param \DateTimeInterface $startDate
+     * @return \DateTimeInterface
+     */
+    private function createStartDateFromTomorrow(\DateTimeInterface $startDate): \DateTimeInterface
+    {
+        return (new \DateTime($startDate->format(DATE_ATOM)))->modify('+1 day');
     }
 }

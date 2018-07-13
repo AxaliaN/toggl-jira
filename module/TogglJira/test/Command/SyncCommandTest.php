@@ -60,52 +60,30 @@ class SyncCommandTest extends TestCase
      */
     public function testExecute(): void
     {
-        $dateTime = '2017-04-15T23:35:00+02:00';
+        $startDate = new \DateTimeImmutable('2017-04-15T23:35:00+02:00');
 
         $requestMock = \Mockery::mock(Request::class);
+        $requestMock->shouldReceive('getParam')->with('startDate', null)->andReturnNull();
+        $requestMock->shouldReceive('getParam')->with('endDate', null)->andReturn('tomorrow');
+        $requestMock->shouldReceive('getParam')->with('overwrite', false)->andReturnTrue();
+
         $consoleMock = \Mockery::mock(AdapterInterface::class);
 
-        $this->optionsMock->shouldReceive('getLastSync')->andReturn($dateTime);
+        $this->optionsMock->shouldReceive('getLastSync')->andReturn($startDate);
         $this->optionsMock->shouldReceive('setLastSync');
         $this->optionsMock->shouldReceive('toArray');
         $this->writerMock->shouldReceive('toFile');
 
         $this->loggerMock->shouldReceive('info')
-            ->with("Syncing time entries since {$dateTime}")
+            ->with('Syncing time entries', ['lastSync' => '2017-04-15T23:35:00+02:00'])
             ->once();
 
         $this->loggerMock->shouldReceive('info')
             ->with('Updated last sync time')
             ->once();
 
-        $this->syncServiceMock->shouldReceive('sync')->with($dateTime);
+        $this->syncServiceMock->shouldReceive('sync')->once();
 
-        $this->assertEquals(1, $this->command->execute($requestMock, $consoleMock));
-    }
-
-    /**
-     * @return void
-     */
-    public function testExecuteWithoutStartDate(): void
-    {
-        $requestMock = \Mockery::mock(Request::class);
-        $consoleMock = \Mockery::mock(AdapterInterface::class);
-
-        $this->optionsMock->shouldReceive('getLastSync')->andReturn("");
-        $this->optionsMock->shouldReceive('setLastSync');
-        $this->optionsMock->shouldReceive('toArray');
-        $this->writerMock->shouldReceive('toFile');
-
-        $this->loggerMock->shouldReceive('info')
-            ->with(\Mockery::pattern('/(Syncing time entries since)/'))
-            ->once();
-
-        $this->loggerMock->shouldReceive('info')
-            ->with('Updated last sync time')
-            ->once();
-
-        $this->syncServiceMock->shouldReceive('sync');
-
-        $this->assertEquals(1, $this->command->execute($requestMock, $consoleMock));
+        $this->assertEquals(0, $this->command->execute($requestMock, $consoleMock));
     }
 }
