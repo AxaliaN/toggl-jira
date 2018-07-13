@@ -65,16 +65,10 @@ class SyncService implements LoggerAwareInterface
             throw new RuntimeException("User with username {$this->username} not found");
         }
 
-        while ($startDate < $endDate) {
-            $timeEntries = $this->getTimeEntries($startDate, $endDate);
-            if (!$timeEntries) {
-                $startDate = $this->createStartDateFromTomorrow($startDate);
-                continue;
-            }
+        $timeEntries = $this->getTimeEntries($startDate, $endDate);
 
+        if ($timeEntries) {
             $this->addWorkLogsToApi($this->parseTimeEntries($timeEntries), $user, $overwrite);
-
-            $startDate = $this->createStartDateFromTomorrow($startDate);
         }
 
         $this->logger->info('All done for today, time to go home!');
@@ -220,14 +214,5 @@ class SyncService implements LoggerAwareInterface
                 $this->logger->error('Could not add worklog entry', ['exception' => $e]);
             }
         }
-    }
-
-    /**
-     * @param \DateTimeInterface $startDate
-     * @return \DateTimeInterface
-     */
-    private function createStartDateFromTomorrow(\DateTimeInterface $startDate): \DateTimeInterface
-    {
-        return (new \DateTime($startDate->format(DATE_ATOM)))->modify('+1 day');
     }
 }
