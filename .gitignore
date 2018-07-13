@@ -5,3 +5,4 @@ data/cache/*
 !data/cache/.gitkeep
 .idea/
 config.json
+.phpunit.result.cache

@@ -26,6 +26,7 @@ class Api extends BaseApi
      * @param string $created
      * @param bool $overwrite
      * @return array|BaseApi\Result|false
+     * @throws \Exception
      */
     public function addWorkLogEntry(
         string $issueID,
