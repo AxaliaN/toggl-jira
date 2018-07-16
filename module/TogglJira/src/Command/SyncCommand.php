@@ -52,8 +52,8 @@ class SyncCommand implements CommandInterface, LoggerAwareInterface
     {
         $reqStartDate = $request->getParam('startDate', null);
         $reqEndDate = $request->getParam('endDate', null);
-        $startDate = $reqStartDate ? new \DateTimeImmutable($reqStartDate) : $this->syncOptions->getLastSync();
-        $endDate = $reqEndDate ? new \DateTimeImmutable($reqEndDate) : new \DateTimeImmutable('now');
+        $startDate = $reqStartDate ? new \DateTime($reqStartDate) : $this->syncOptions->getLastSync();
+        $endDate = $reqEndDate ? new \DateTime($reqEndDate) : new \DateTime('now');
         $overwrite = (bool) $request->getParam('overwrite', false);
 
         $this->logger->info(

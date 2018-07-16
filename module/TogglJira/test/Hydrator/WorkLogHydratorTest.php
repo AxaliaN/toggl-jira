@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace TogglJiraTest\Hydrator;
 
-use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use TogglJira\Entity\WorkLogEntry;
 use TogglJira\Hydrator\WorkLogHydrator;
@@ -45,7 +44,7 @@ class WorkLogHydratorTest extends TestCase
             'issueID' => 'DVA-42',
             'timeSpent' => 9001,
             'comment' => 'Nerf this!',
-            'spentOn' => new DateTimeImmutable('2017-04-15T23:50:00+02:0')
+            'spentOn' => new \DateTimeImmutable('2017-04-15T23:50:00+02:0')
         ];
 
         $object = new WorkLogEntry();

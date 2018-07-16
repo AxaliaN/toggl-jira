@@ -3,29 +3,27 @@ declare(strict_types=1);
 
 namespace TogglJira\Entity;
 
-use DateTimeImmutable;
-
 class WorkLogEntry
 {
-    /**
-     * @var string
-     */
-    private $issueID;
-
-    /**
-     * @var int
-     */
-    private $timeSpent;
-
     /**
      * @var string
      */
     private $comment;
 
     /**
-     * @var DateTimeImmutable
+     * @var string
+     */
+    private $issueID;
+
+    /**
+     * @var \DateTimeInterface
      */
     private $spentOn;
+
+    /**
+     * @var int
+     */
+    private $timeSpent;
 
     /**
      * @return string
@@ -60,17 +58,17 @@ class WorkLogEntry
     }
 
     /**
-     * @return DateTimeImmutable
+     * @return \DateTimeInterface
      */
-    public function getSpentOn(): DateTimeImmutable
+    public function getSpentOn(): \DateTimeInterface
     {
         return $this->spentOn;
     }
 
     /**
-     * @param DateTimeImmutable $spentOn
+     * @param \DateTimeInterface $spentOn
      */
-    public function setSpentOn(DateTimeImmutable $spentOn): void
+    public function setSpentOn(\DateTimeInterface $spentOn): void
     {
         $this->spentOn = $spentOn;
     }
