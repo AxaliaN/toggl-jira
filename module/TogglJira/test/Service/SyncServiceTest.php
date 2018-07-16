@@ -86,11 +86,11 @@ class SyncServiceTest extends TestCase
         $timeEntries16th = [];
 
         $this->togglClientMock->shouldReceive('getTimeEntries')
-            ->with(['start_date' => '2017-04-15T00:00:00+00:00', 'end_date' => '2017-04-15T23:59:59+00:00'])
+            ->with(['start_date' => '2017-04-15T00:00:00+02:00', 'end_date' => '2017-04-15T23:59:59+02:00'])
             ->andReturn(new Result($timeEntries15th));
 
         $this->togglClientMock->shouldReceive('getTimeEntries')
-            ->with(['start_date' => '2017-04-16T00:00:00+00:00', 'end_date' => '2017-04-16T23:59:59+00:00'])
+            ->with(['start_date' => '2017-04-16T00:00:00+02:00', 'end_date' => '2017-04-16T23:59:59+02:00'])
             ->andReturn(new Result($timeEntries16th));
 
         $workLogEntry = new WorkLogEntry();
@@ -164,7 +164,7 @@ class SyncServiceTest extends TestCase
         $this->apiMock->shouldReceive('getUser')->andReturn($user);
 
         $this->togglClientMock->shouldReceive('getTimeEntries')
-            ->with(['start_date' => '2017-04-15T00:00:00+00:00', 'end_date' => '2017-04-15T23:59:59+00:00'])
+            ->with(['start_date' => '2017-04-15T00:00:00+02:00', 'end_date' => '2017-04-15T23:59:59+02:00'])
             ->andThrow(\Exception::class, 'Nerf this!');
 
         $this->loggerMock->shouldReceive('error')
@@ -202,7 +202,7 @@ class SyncServiceTest extends TestCase
         $result = new Result($timeEntries);
 
         $this->togglClientMock->shouldReceive('getTimeEntries')
-            ->with(['start_date' => '2017-04-15T00:00:00+00:00', 'end_date' => '2017-04-15T23:59:59+00:00'])
+            ->with(['start_date' => '2017-04-15T00:00:00+02:00', 'end_date' => '2017-04-15T23:59:59+02:00'])
             ->andReturn($result);
 
         $user = [
@@ -255,7 +255,7 @@ class SyncServiceTest extends TestCase
         $result = new Result($timeEntries);
         
         $this->togglClientMock->shouldReceive('getTimeEntries')
-            ->with(['start_date' => '2017-04-15T00:00:00+00:00', 'end_date' => '2017-04-15T23:59:59+00:00'])
+            ->with(['start_date' => '2017-04-15T00:00:00+02:00', 'end_date' => '2017-04-15T23:59:59+02:00'])
             ->andReturn($result);
 
         $workLogEntry = new WorkLogEntry();
