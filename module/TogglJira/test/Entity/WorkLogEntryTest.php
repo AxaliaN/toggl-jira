@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace TogglJiraTest\Entity;
 
-use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
 use TogglJira\Entity\WorkLogEntry;
 
@@ -32,7 +31,7 @@ class WorkLogEntryTest extends TestCase
             'issueID' => 'TST-01',
             'timeSpent' => 666,
             'comment' => 'This is a test',
-            'spentOn' => new DateTimeImmutable()
+            'spentOn' => new \DateTimeImmutable()
         ];
 
         $this->entity->setIssueID($data['issueID']);

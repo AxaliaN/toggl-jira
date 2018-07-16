@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace TogglJira\Hydrator;
 
-use DateTimeImmutable;
 use TogglJira\Entity\WorkLogEntry;
 use Zend\Hydrator\HydratorInterface;
 
@@ -49,7 +48,7 @@ class WorkLogHydrator implements HydratorInterface
         }
 
         if (isset($data['spentOn'])) {
-            $object->setSpentOn(new DateTimeImmutable($data['spentOn']));
+            $object->setSpentOn(new \DateTimeImmutable($data['spentOn']));
         }
 
         return $object;

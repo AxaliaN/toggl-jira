@@ -59,15 +59,36 @@ class SyncService implements LoggerAwareInterface
      */
     public function sync(\DateTimeInterface $startDate, \DateTimeInterface $endDate, bool $overwrite): void
     {
+        // Make sure we always start and end at 0:00. We only sync per day.
+        $startDate = new \DateTime($startDate->format('Y-m-d'));
+        $endDate = new \DateTime($endDate->format('Y-m-d'));
+
         $user = $this->api->getUser($this->username);
 
         if (!isset($user['accountId'])) {
             throw new RuntimeException("User with username {$this->username} not found");
         }
 
-        $timeEntries = $this->getTimeEntries($startDate, $endDate);
+        // Iterate over each day and process all time entries.
+        while ($startDate <= $endDate) {
+            // Fetch time entries once per day, use the startDate +1 day at 0:00:00, to make sure we cover the full day
+            // in the iteration.
+            $clonedStartDate = clone $startDate;
+            $timeEntries = $this->getTimeEntries(
+                $startDate,
+                $clonedStartDate->add(new \DateInterval('PT23H59M59S'))
+            );
 
-        if ($timeEntries) {
+            if ($timeEntries === null) {
+                break;
+            }
+
+            $startDate->modify('+1 day');
+
+            if (!$timeEntries) {
+                continue;
+            }
+
             $this->addWorkLogsToApi($this->parseTimeEntries($timeEntries), $user, $overwrite);
         }
 
@@ -196,7 +217,7 @@ class SyncService implements LoggerAwareInterface
         /** @var WorkLogEntry $workLogEntry */
         foreach ($workLogEntries as $workLogEntry) {
             try {
-                $this->api->addWorkLogEntry(
+                $result = $this->api->addWorkLogEntry(
                     $workLogEntry->getIssueID(),
                     $workLogEntry->getTimeSpent(),
                     $user['accountId'],
@@ -204,6 +225,12 @@ class SyncService implements LoggerAwareInterface
                     $workLogEntry->getSpentOn()->format('Y-m-d\TH:i:s.vO'),
                     $overwrite
                 );
+
+                if (isset($result->getResult()['errorMessages']) && \count($result->getResult()['errorMessages']) > 0) {
+                    $this->logger->error(implode("\n", $result->getResult()['errorMessages']), [
+                        'issueID' => $workLogEntry->getIssueID()
+                    ]);
+                }
 
                 $this->logger->info('Saved worklog entry', [
                     'issueID' => $workLogEntry->getIssueID(),

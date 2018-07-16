@@ -48,23 +48,26 @@ class Api extends BaseApi
         $worklogResponse = $this->api(self::REQUEST_GET, "/rest/api/2/issue/{$issueID}/worklog");
         $workLogResult = $worklogResponse->getResult();
 
-        $startedDay = (new \DateTimeImmutable($params['started']))->format('d-m-Y');
+        $startedDay = (new \DateTimeImmutable($params['started']))->format('Y-m-d');
 
         if (isset($workLogResult['worklogs'])) {
             foreach ($workLogResult['worklogs'] as $workLog) {
-                $workLogStartedDay = (new \DateTimeImmutable($workLog['started']))->format('d-m-Y');
+                $workLogStartedDay = (new \DateTimeImmutable($workLog['started']))->format('Y-m-d');
 
-                if ($startedDay === $workLogStartedDay &&
-                    $workLog['author']['accountId'] === $accountId
-                ) {
-                    if (!$overwrite) {
-                        return $this->api(
-                            self::REQUEST_PUT,
-                            "/rest/api/2/issue/{$issueID}/worklog/{$workLog['id']}?adjustEstimate=auto",
-                            $params
-                        );
-                    }
+                if ($startedDay !== $workLogStartedDay ||
+                    $workLog['author']['accountId'] !== $accountId) {
+                    continue;
+                }
 
+                if (!$overwrite) {
+                    return $this->api(
+                        self::REQUEST_PUT,
+                        "/rest/api/2/issue/{$issueID}/worklog/{$workLog['id']}?adjustEstimate=auto",
+                        $params
+                    );
+                }
+
+                if ($overwrite) {
                     /**
                      * When overwriting the worklogs, delete the existing worklogs first before recreating.
                      */
@@ -73,8 +76,6 @@ class Api extends BaseApi
             }
         }
 
-        $result = $this->api(self::REQUEST_POST, "/rest/api/2/issue/{$issueID}/worklog?adjustEstimate=auto", $params);
-
-        return $result;
+        return $this->api(self::REQUEST_POST, "/rest/api/2/issue/{$issueID}/worklog?adjustEstimate=auto", $params);
     }
 }

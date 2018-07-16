@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace TogglJiraTest\Service;
 
 use AJT\Toggl\TogglClient;
-use DateTimeImmutable;
+use DateTime;
 use GuzzleHttp\Command\Result;
 use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
@@ -65,10 +65,10 @@ class SyncServiceTest extends TestCase
      */
     public function testSync(): void
     {
-        $startDate = new DateTimeImmutable('2017-04-15T23:35:00.000+0200');
-        $endDate = new DateTimeImmutable('2017-04-16T23:35:00.000+0200');
+        $startDate = new \DateTime('2017-04-15');
+        $endDate = new \DateTime('2017-04-16');
 
-        $timeEntries = [
+        $timeEntries15th = [
             [
                 'description' => 'SLR-76 Soldier 76',
                 'duration' => 76,
@@ -83,16 +83,19 @@ class SyncServiceTest extends TestCase
             ],
         ];
 
-        $result = new Result($timeEntries);
+        $timeEntries16th = [];
 
         $this->togglClientMock->shouldReceive('getTimeEntries')
-            ->with([
-                'start_date' => $startDate->format(DATE_ATOM), 'end_date' => $endDate->format(DATE_ATOM)])
-            ->andReturn($result);
+            ->with(['start_date' => '2017-04-15T00:00:00+00:00', 'end_date' => '2017-04-15T23:59:59+00:00'])
+            ->andReturn(new Result($timeEntries15th));
+
+        $this->togglClientMock->shouldReceive('getTimeEntries')
+            ->with(['start_date' => '2017-04-16T00:00:00+00:00', 'end_date' => '2017-04-16T23:59:59+00:00'])
+            ->andReturn(new Result($timeEntries16th));
 
         $workLogEntry = new WorkLogEntry();
         $workLogEntry->setIssueID('SLR-76');
-        $workLogEntry->setSpentOn($startDate);
+        $workLogEntry->setSpentOn(new \DateTimeImmutable('2018-02-15'));
         $workLogEntry->setComment('SLR-76');
         $workLogEntry->setTimeSpent(76);
 
@@ -104,27 +107,29 @@ class SyncServiceTest extends TestCase
 
         $this->apiMock->shouldReceive('getUser')->andReturn($user);
 
+        $result = \Mockery::mock(Result::class);
+        $result->shouldReceive('getResult')->once();
         $this->apiMock->shouldReceive('addWorkLogEntry')->with(
             $workLogEntry->getIssueID(),
             $workLogEntry->getTimeSpent() * 2,
             'D-Va',
             $workLogEntry->getComment() . "\n" . $workLogEntry->getComment(),
-            $startDate->format('Y-m-d\TH:i:s.vO'),
+            $workLogEntry->getSpentOn()->format('Y-m-d\TH:i:s.vO'),
             false
-        );
+        )->andReturn($result);
 
         $this->loggerMock
             ->shouldReceive('info')
             ->with(
                 'Found time entry for issue',
-                ['issueID' => 'SLR-76', 'spentOn' => '2017-04-15', 'timeSpent' => '0.02 hours']
+                ['issueID' => 'SLR-76', 'spentOn' => '2018-02-15', 'timeSpent' => '0.02 hours']
             );
 
         $this->loggerMock
             ->shouldReceive('info')
             ->with(
                 'Added time spent for issue',
-                ['issueID' => 'SLR-76', 'spentOn' => '2017-04-15', 'timeSpent' => '0.04 hours']
+                ['issueID' => 'SLR-76', 'spentOn' => '2018-02-15', 'timeSpent' => '0.04 hours']
             );
 
         $this->loggerMock
@@ -135,7 +140,7 @@ class SyncServiceTest extends TestCase
             ->shouldReceive('info')
             ->with(
                 'Saved worklog entry',
-                ['issueID' => 'SLR-76', 'spentOn' => '2017-04-15', 'timeSpent' => '0.04 hours']
+                ['issueID' => 'SLR-76', 'spentOn' => '2018-02-15', 'timeSpent' => '0.04 hours']
             );
 
         $this->loggerMock->shouldReceive('info')->with('All done for today, time to go home!');
@@ -149,8 +154,8 @@ class SyncServiceTest extends TestCase
      */
     public function testExceptionOnTogglError(): void
     {
-        $dateTime = new DateTimeImmutable('2017-04-15T23:35:00+02:00');
-        $endDate = new DateTimeImmutable('2017-04-16T23:35:00+02:00');
+        $startTime = new DateTime('2017-04-15');
+        $endDate = new DateTime('2017-04-16');
 
         $user = [
             'accountId' => 'D-Va'
@@ -159,10 +164,7 @@ class SyncServiceTest extends TestCase
         $this->apiMock->shouldReceive('getUser')->andReturn($user);
 
         $this->togglClientMock->shouldReceive('getTimeEntries')
-            ->with([
-                'start_date' => $dateTime->format(DATE_ATOM),
-                'end_date' => $endDate->format(DATE_ATOM)
-            ])
+            ->with(['start_date' => '2017-04-15T00:00:00+00:00', 'end_date' => '2017-04-15T23:59:59+00:00'])
             ->andThrow(\Exception::class, 'Nerf this!');
 
         $this->loggerMock->shouldReceive('error')
@@ -170,7 +172,7 @@ class SyncServiceTest extends TestCase
 
         $this->loggerMock->shouldReceive('info')->with('All done for today, time to go home!');
 
-        $this->service->sync($dateTime, $endDate, false);
+        $this->service->sync($startTime, $endDate, false);
     }
 
     /**
@@ -179,8 +181,8 @@ class SyncServiceTest extends TestCase
      */
     public function testSyncWithInvalidTimeEntries(): void
     {
-        $startDate = new DateTimeImmutable('2017-04-15T23:35:00+02:00');
-        $endDate = new DateTimeImmutable('2017-04-16T23:35:00+02:00');
+        $startDate = new DateTime('2017-04-15');
+        $endDate = new DateTime('2017-04-15');
 
         $timeEntries = [
             [
@@ -200,10 +202,7 @@ class SyncServiceTest extends TestCase
         $result = new Result($timeEntries);
 
         $this->togglClientMock->shouldReceive('getTimeEntries')
-            ->with([
-                'start_date' => $startDate->format(DATE_ATOM),
-                'end_date' => $endDate->format(DATE_ATOM)
-            ])
+            ->with(['start_date' => '2017-04-15T00:00:00+00:00', 'end_date' => '2017-04-15T23:59:59+00:00'])
             ->andReturn($result);
 
         $user = [
@@ -229,8 +228,8 @@ class SyncServiceTest extends TestCase
      */
     public function testSyncJiraException(): void
     {
-        $startDate = new DateTimeImmutable('2017-04-15T23:35:00.000+0200');
-        $endDate = new DateTimeImmutable('2017-04-16T23:35:00.000+0200');
+        $startDate = new DateTime('2017-04-15');
+        $endDate = new DateTime('2017-04-15');
 
         $user = [
             'accountId' => 'D-Va'
@@ -256,15 +255,12 @@ class SyncServiceTest extends TestCase
         $result = new Result($timeEntries);
         
         $this->togglClientMock->shouldReceive('getTimeEntries')
-            ->with([
-                'start_date' => $startDate->format(DATE_ATOM),
-                'end_date' => $endDate->format(DATE_ATOM),
-            ])
+            ->with(['start_date' => '2017-04-15T00:00:00+00:00', 'end_date' => '2017-04-15T23:59:59+00:00'])
             ->andReturn($result);
 
         $workLogEntry = new WorkLogEntry();
         $workLogEntry->setIssueID('SLR-76');
-        $workLogEntry->setSpentOn($startDate);
+        $workLogEntry->setSpentOn(new \DateTimeImmutable('2018-02-15'));
         $workLogEntry->setComment('SLR-76');
         $workLogEntry->setTimeSpent(76);
 
@@ -275,14 +271,14 @@ class SyncServiceTest extends TestCase
             $workLogEntry->getTimeSpent() * 2,
             'D-Va',
             $workLogEntry->getComment(),
-            $startDate
+            $workLogEntry->getSpentOn()->format('Y-m-d\TH:i:s.vO')
         )->andThrow(\Exception::class, 'Nerf this!');
 
         $this->loggerMock
             ->shouldReceive('info')
             ->with(
                 'Found time entry for issue',
-                ['issueID' => 'SLR-76', 'spentOn' => '2017-04-15', 'timeSpent' => '0.02 hours']
+                ['issueID' => 'SLR-76', 'spentOn' => '2018-02-15', 'timeSpent' => '0.02 hours']
             );
 
         $this->loggerMock
@@ -293,7 +289,7 @@ class SyncServiceTest extends TestCase
             ->shouldReceive('info')
             ->with(
                 'Added time spent for issue',
-                ['issueID' => 'SLR-76', 'spentOn' => '2017-04-15', 'timeSpent' => '0.04 hours']
+                ['issueID' => 'SLR-76', 'spentOn' => '2018-02-15', 'timeSpent' => '0.04 hours']
             );
 
         $this->loggerMock->shouldReceive('info')->with('All done for today, time to go home!');
@@ -309,8 +305,8 @@ class SyncServiceTest extends TestCase
      */
     public function testExceptionThrownOnUserNotFound(): void
     {
-        $startDate = new DateTimeImmutable('2017-04-15T23:35:00.000+0200');
-        $endDate = new DateTimeImmutable('2017-04-16T23:35:00.000+0200');
+        $startDate = new DateTime('2017-04-15');
+        $endDate = new DateTime('2017-04-15');
         $this->apiMock->shouldReceive('getUser')->andReturn([]);
 
         $this->service->sync($startDate, $endDate, false);

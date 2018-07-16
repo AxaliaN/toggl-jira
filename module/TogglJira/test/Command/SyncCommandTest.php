@@ -60,7 +60,7 @@ class SyncCommandTest extends TestCase
      */
     public function testExecute(): void
     {
-        $startDate = new \DateTimeImmutable('2017-04-15T23:35:00+02:00');
+        $startDate = new \DateTime('2017-04-15T23:35:00+02:00');
 
         $requestMock = \Mockery::mock(Request::class);
         $requestMock->shouldReceive('getParam')->with('startDate', null)->andReturnNull();
