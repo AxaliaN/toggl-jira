@@ -195,7 +195,10 @@ class SyncService implements LoggerAwareInterface
         $timeSpent += $newWorkLog->getTimeSpent();
 
         $existingWorkLog->setTimeSpent($timeSpent);
-        $existingWorkLog->setComment($existingWorkLog->getComment() . "\n" . $newWorkLog->getComment());
+
+        if (!preg_match("/{$existingWorkLog->getComment()}/", $existingWorkLog->getComment())) {
+            $existingWorkLog->setComment($existingWorkLog->getComment() . "\n" . $newWorkLog->getComment());
+        }
 
         $this->logger->info('Added time spent for issue', [
             'issueID' => $newWorkLog->getIssueID(),

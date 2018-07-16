@@ -113,7 +113,7 @@ class SyncServiceTest extends TestCase
             $workLogEntry->getIssueID(),
             $workLogEntry->getTimeSpent() * 2,
             'D-Va',
-            $workLogEntry->getComment() . "\n" . $workLogEntry->getComment(),
+            $workLogEntry->getComment(),
             $workLogEntry->getSpentOn()->format('Y-m-d\TH:i:s.vO'),
             false
         )->andReturn($result);
