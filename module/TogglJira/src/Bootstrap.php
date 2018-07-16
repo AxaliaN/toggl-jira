@@ -31,6 +31,7 @@ class Bootstrap
      */
     public function setupConsoleApp(): ConsoleApplication
     {
+        date_default_timezone_set('Europe/Amsterdam');
         $services = $this->mvcApp->getServiceManager();
 
         $version = $services->get('Config')['version'];

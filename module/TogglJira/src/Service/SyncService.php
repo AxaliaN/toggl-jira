@@ -85,7 +85,7 @@ class SyncService implements LoggerAwareInterface
 
             $startDate->modify('+1 day');
 
-            if (!$timeEntries) {
+            if (empty($timeEntries)) {
                 continue;
             }
 
