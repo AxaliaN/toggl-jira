@@ -31,7 +31,14 @@ class SyncServiceFactory implements FactoryInterface
 
         $logger = $container->get('Logger');
 
-        $service = new SyncService($api, $togglClient, new WorkLogHydrator(), $syncOptions->getJiraUsername());
+        $service = new SyncService(
+            $api,
+            $togglClient,
+            new WorkLogHydrator(),
+            $syncOptions->getJiraUsername(),
+            $syncOptions->getFillIssueID()
+        );
+
         $service->setLogger($logger);
 
         return $service;

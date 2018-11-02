@@ -41,6 +41,8 @@ class SyncOptionsTest extends TestCase
             'jiraPassword' => 'bar',
             'togglApiKey' => 'foz',
             'jiraUrl' => 'http://www.example.com',
+            'fillIssueID' => 'FOO-01',
+            'fillIssueComment' => 'Support',
         ];
 
         $syncOptions = new SyncOptions($data);

@@ -2,5 +2,7 @@
     "jiraUrl": "",
     "jiraUsername": "",
     "jiraPassword": "",
-    "togglApiKey": ""
+    "togglApiKey": "",
+    "fillIssueID": ""
+    "fillIssueComment": ""
 }

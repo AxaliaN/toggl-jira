@@ -47,14 +47,23 @@ class SyncServiceTest extends TestCase
      */
     public function setUp(): void
     {
-        \ Mockery::getConfiguration()->allowMockingNonExistentMethods(true);
+        \Mockery::getConfiguration()->allowMockingNonExistentMethods(true);
+
+        date_default_timezone_set('Europe/Amsterdam');
 
         $this->apiMock = \Mockery::mock(Api::class);
         $this->togglClientMock = \Mockery::mock(TogglClient::class);
         $this->hydratorMock = \Mockery::mock(WorkLogHydrator::class);
         $this->loggerMock = \Mockery::mock(LoggerInterface::class);
 
-        $this->service = new SyncService($this->apiMock, $this->togglClientMock, $this->hydratorMock, 'D-Va');
+        $this->service = new SyncService(
+            $this->apiMock,
+            $this->togglClientMock,
+            $this->hydratorMock,
+            'D-Va',
+            'FOO-01',
+            'Support'
+        );
 
         $this->service->setLogger($this->loggerMock);
     }
@@ -65,8 +74,8 @@ class SyncServiceTest extends TestCase
      */
     public function testSync(): void
     {
-        $startDate = new \DateTime('2017-04-15');
-        $endDate = new \DateTime('2017-04-16');
+        $startDate = new \DateTime('2017-05-15');
+        $endDate = new \DateTime('2017-05-16');
 
         $timeEntries15th = [
             [
@@ -86,11 +95,11 @@ class SyncServiceTest extends TestCase
         $timeEntries16th = [];
 
         $this->togglClientMock->shouldReceive('getTimeEntries')
-            ->with(['start_date' => '2017-04-15T00:00:00+02:00', 'end_date' => '2017-04-15T23:59:59+02:00'])
+            ->with(['start_date' => '2017-05-15T00:00:00+02:00', 'end_date' => '2017-05-15T23:59:59+02:00'])
             ->andReturn(new Result($timeEntries15th));
 
         $this->togglClientMock->shouldReceive('getTimeEntries')
-            ->with(['start_date' => '2017-04-16T00:00:00+02:00', 'end_date' => '2017-04-16T23:59:59+02:00'])
+            ->with(['start_date' => '2017-05-16T00:00:00+02:00', 'end_date' => '2017-05-16T23:59:59+02:00'])
             ->andReturn(new Result($timeEntries16th));
 
         $workLogEntry = new WorkLogEntry();
@@ -108,13 +117,22 @@ class SyncServiceTest extends TestCase
         $this->apiMock->shouldReceive('getUser')->andReturn($user);
 
         $result = \Mockery::mock(Result::class);
-        $result->shouldReceive('getResult')->once();
+        $result->shouldReceive('getResult')->twice();
+
         $this->apiMock->shouldReceive('addWorkLogEntry')->with(
             $workLogEntry->getIssueID(),
-            $workLogEntry->getTimeSpent() * 2,
+            152,
             'D-Va',
             $workLogEntry->getComment(),
-            $workLogEntry->getSpentOn()->format('Y-m-d\TH:i:s.vO'),
+            '2018-02-15T00:00:00.000+0100',
+            false
+        )->andReturn($result);
+        $this->apiMock->shouldReceive('addWorkLogEntry')->with(
+            'FOO-01',
+            28708,
+            'D-Va',
+            'Support',
+            '2017-05-15T23:59:59.000+0200',
             false
         )->andReturn($result);
 
@@ -141,6 +159,12 @@ class SyncServiceTest extends TestCase
             ->with(
                 'Saved worklog entry',
                 ['issueID' => 'SLR-76', 'spentOn' => '2018-02-15', 'timeSpent' => '0.04 hours']
+            );
+        $this->loggerMock
+            ->shouldReceive('info')
+            ->with(
+                'Saved worklog entry',
+                ['issueID' => 'FOO-01', 'spentOn' => '2017-05-15', 'timeSpent' => '7.97 hours']
             );
 
         $this->loggerMock->shouldReceive('info')->with('All done for today, time to go home!');
@@ -189,13 +213,13 @@ class SyncServiceTest extends TestCase
                 'description' => 'SLR76 Soldier 76',
                 'duration' => 76,
                 'comment' => 'Soldier 76, not reporting for duty',
-                'start' => '2018-02-15'
+                'start' => '2017-04-15'
             ],
             [
                 'description' => 'SLR-76 Soldier 76',
                 'duration' => -1,
                 'comment' => 'Soldier 76, not reporting for duty',
-                'start' => '2018-02-15'
+                'start' => '2017-04-15'
             ],
         ];
 
@@ -211,11 +235,29 @@ class SyncServiceTest extends TestCase
 
         $this->apiMock->shouldReceive('getUser')->andReturn($user);
 
+        $result = \Mockery::mock(Result::class);
+
+        $this->apiMock->shouldReceive('addWorkLogEntry')->with(
+            'FOO-01',
+            28800,
+            'D-Va',
+            'Support',
+            '2017-04-15T23:59:59.000+0000',
+            false
+        )->andReturn($result);
+
         $this->loggerMock->shouldReceive('warning')
             ->with('Could not parse issue string, cannot link to Jira');
 
         $this->loggerMock->shouldReceive('info')
             ->with('0 seconds, or timer still running, skipping', ['issueID' => 'SLR-76']);
+
+        $this->loggerMock
+            ->shouldReceive('info')
+            ->with(
+                'Saved worklog entry',
+                ['issueID' => 'FOO-01', 'spentOn' => '2017-04-15', 'timeSpent' => '8 hours']
+            );
 
         $this->loggerMock->shouldReceive('info')->with('All done for today, time to go home!');
 
