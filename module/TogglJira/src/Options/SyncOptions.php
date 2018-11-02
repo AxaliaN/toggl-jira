@@ -32,7 +32,21 @@ class SyncOptions extends AbstractOptions
      */
     private $jiraUrl;
 
-    public function __construct($options = null)
+    /**
+     * @var string
+     */
+    private $fillIssueID;
+
+    /**
+     * @var string
+     */
+    private $fillIssueComment;
+
+    /**
+     * @param array|null $options
+     * @throws \Exception
+     */
+    public function __construct(array $options = null)
     {
         $this->lastSync = new \DateTimeImmutable('-1 day');
 
@@ -120,6 +134,38 @@ class SyncOptions extends AbstractOptions
     }
 
     /**
+     * @return string
+     */
+    public function getFillIssueID(): string
+    {
+        return $this->fillIssueID;
+    }
+
+    /**
+     * @param string $fillIssueID
+     */
+    public function setFillIssueID(string $fillIssueID): void
+    {
+        $this->fillIssueID = $fillIssueID;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFillIssueComment(): string
+    {
+        return $this->fillIssueComment;
+    }
+
+    /**
+     * @param string $fillIssueComment
+     */
+    public function setFillIssueComment(string $fillIssueComment): void
+    {
+        $this->fillIssueComment = $fillIssueComment;
+    }
+
+    /**
      * @return array
      */
     public function toArray(): array
@@ -130,6 +176,8 @@ class SyncOptions extends AbstractOptions
             'jiraUsername' => $this->getJiraUsername(),
             'jiraPassword' => $this->getJiraPassword(),
             'togglApiKey' => $this->getTogglApiKey(),
+            'fillIssueID' => $this->getFillIssueID(),
+            'fillIssueComment' => $this->getFillIssueComment(),
         ];
     }
 }

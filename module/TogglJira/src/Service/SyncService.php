@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace TogglJira\Service;
 
 use AJT\Toggl\TogglClient;
+use DateInterval;
+use DateTime;
+use DateTimeInterface;
 use Exception;
 use GuzzleHttp\Command\Guzzle\GuzzleClient;
 use Psr\Log\LoggerAwareInterface;
@@ -16,6 +19,8 @@ use TogglJira\Jira\Api;
 class SyncService implements LoggerAwareInterface
 {
     use LoggerAwareTrait;
+
+    private const REQUIRED_TIME_SPENT = 28800;
 
     /**
      * @var Api
@@ -31,37 +36,58 @@ class SyncService implements LoggerAwareInterface
      * @var WorkLogHydrator
      */
     private $workLogHydrator;
+
     /**
      * @var string
      */
     private $username;
 
     /**
+     * @var string
+     */
+    private $fillIssueID;
+
+    /**
+     * @var string
+     */
+    private $fillIssueComment;
+
+    /**
      * @param Api $api
      * @param GuzzleClient $togglClient
      * @param WorkLogHydrator $workLogHydrator
      * @param string $username
+     * @param string|null $fillIssueID
+     * @param string $fillIssueComment
      */
-    public function __construct(Api $api, GuzzleClient $togglClient, WorkLogHydrator $workLogHydrator, string $username)
-    {
+    public function __construct(
+        Api $api,
+        GuzzleClient $togglClient,
+        WorkLogHydrator $workLogHydrator,
+        string $username,
+        string $fillIssueID = null,
+        string $fillIssueComment = ''
+    ) {
         $this->api = $api;
         $this->togglClient = $togglClient;
         $this->workLogHydrator = $workLogHydrator;
         $this->username = $username;
+        $this->fillIssueID = $fillIssueID;
+        $this->fillIssueComment = $fillIssueComment;
     }
 
     /**
-     * @param \DateTimeInterface $startDate
-     * @param \DateTimeInterface $endDate
+     * @param DateTimeInterface $startDate
+     * @param DateTimeInterface $endDate
      * @param bool $overwrite
      * @return void
      * @throws Exception
      */
-    public function sync(\DateTimeInterface $startDate, \DateTimeInterface $endDate, bool $overwrite): void
+    public function sync(DateTimeInterface $startDate, DateTimeInterface $endDate, bool $overwrite): void
     {
         // Make sure we always start and end at 0:00. We only sync per day.
-        $startDate = new \DateTime($startDate->format('Y-m-d'));
-        $endDate = new \DateTime($endDate->format('Y-m-d'));
+        $startDate = new DateTime($startDate->format('Y-m-d'));
+        $endDate = new DateTime($endDate->format('Y-m-d'));
 
         $user = $this->api->getUser($this->username);
 
@@ -76,7 +102,7 @@ class SyncService implements LoggerAwareInterface
             $clonedStartDate = clone $startDate;
             $timeEntries = $this->getTimeEntries(
                 $startDate,
-                $clonedStartDate->add(new \DateInterval('PT23H59M59S'))
+                $clonedStartDate->add(new DateInterval('PT23H59M59S'))
             );
 
             if ($timeEntries === null) {
@@ -89,18 +115,31 @@ class SyncService implements LoggerAwareInterface
                 continue;
             }
 
-            $this->addWorkLogsToApi($this->parseTimeEntries($timeEntries), $user, $overwrite);
+            $workLogs = $this->parseTimeEntries($timeEntries);
+
+            // Don't fill the current day, since the day might not be over yet
+            // Otherwise, use the filler issue to add the remaining time in order to have the full day filled
+            // Also, only for week days
+            if (
+                $this->fillIssueID &&
+                $clonedStartDate->format('d-m-Y') !== (new DateTime())->format('d-m-Y') &&
+                $clonedStartDate->format('N') <= 5
+            ) {
+                $workLogs = $this->fillTimeToFull($workLogs, $clonedStartDate);
+            }
+
+            $this->addWorkLogsToApi($workLogs, $user, $overwrite);
         }
 
         $this->logger->info('All done for today, time to go home!');
     }
 
     /**
-     * @param \DateTimeInterface $startDate
-     * @param \DateTimeInterface $endDate
+     * @param DateTimeInterface $startDate
+     * @param DateTimeInterface $endDate
      * @return array|null
      */
-    private function getTimeEntries(\DateTimeInterface $startDate, \DateTimeInterface $endDate): ?array
+    private function getTimeEntries(DateTimeInterface $startDate, DateTimeInterface $endDate): ?array
     {
         try {
             /** @var array $timeEntries */
@@ -244,5 +283,44 @@ class SyncService implements LoggerAwareInterface
                 $this->logger->error('Could not add worklog entry', ['exception' => $e]);
             }
         }
+    }
+
+    /**
+     * @param array $workLogEntries
+     * @return array
+     */
+    private function fillTimeToFull(array $workLogEntries, DateTime $processDate): array
+    {
+        $timeSpent = 0;
+
+        /** @var WorkLogEntry $workLogEntry */
+        foreach ($workLogEntries as $workLogEntry) {
+            if ($workLogEntry->getIssueID() == $this->fillIssueID) {
+                $fillIssue = $workLogEntry;
+            }
+
+            $timeSpent += $workLogEntry->getTimeSpent();
+        }
+
+        if ($timeSpent >= self::REQUIRED_TIME_SPENT) {
+            return $workLogEntries;
+        }
+
+        $fillTime = self::REQUIRED_TIME_SPENT - $timeSpent + 60;
+
+        if (!isset($fillIssue)) {
+            $fillIssue = new WorkLogEntry();
+            $fillIssue->setIssueID($this->fillIssueID);
+            $fillIssue->setComment($this->fillIssueComment);
+            $fillIssue->setSpentOn($processDate);
+            $fillIssue->setTimeSpent($fillTime);
+
+            $workLogEntries[] = $fillIssue;
+        } else {
+            $fillIssue->setTimeSpent($fillIssue->getTimeSpent() + $fillTime);
+        }
+
+
+        return $workLogEntries;
     }
 }
