@@ -1,10 +1,7 @@
 {
     "jiraUrl": "",
-    "jiraLoginUsername": "",
+    "jiraUserId": "",
     "jiraUsername": "",
     "jiraPassword": "",
-    "togglApiKey": "",
-    "fillIssueID": ""
-    "fillIssueComment": "",
-    "notifyUsers": true
+    "togglApiKey": ""
 }

@@ -5,7 +5,6 @@ namespace TogglJira\Service;
 
 use AJT\Toggl\TogglClient;
 use chobie\Jira\Api\Authentication\Basic;
-use Exception;
 use Interop\Container\ContainerInterface;
 use TogglJira\Hydrator\WorkLogHydrator;
 use TogglJira\Jira\Api;
@@ -15,37 +14,29 @@ use Zend\ServiceManager\Factory\FactoryInterface;
 class SyncServiceFactory implements FactoryInterface
 {
     /**
-     * @throws Exception
+     * {@inheritdoc}
+     * @throws \Exception
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): SyncService
     {
-        /** @var SyncOptions $options */
+        /** @var SyncOptions $syncOptions */
         $syncOptions = $container->get(SyncOptions::class);
 
         $api = new Api(
             $syncOptions->getJiraUrl(),
-            new Basic(
-                (!empty($syncOptions->getJiraLoginUsername())
-                    ? $syncOptions->getJiraLoginUsername()
-                    : $syncOptions->getJiraUsername()),
-                $syncOptions->getJiraPassword()
-            )
+            new Basic($syncOptions->getJiraUsername(), $syncOptions->getJiraPassword())
         );
 
         $togglClient = TogglClient::factory(['api_key' => $syncOptions->getTogglApiKey(), 'apiVersion' => 'v8']);
-
         $logger = $container->get('Logger');
 
         $service = new SyncService(
             $api,
             $togglClient,
             new WorkLogHydrator(),
-            $syncOptions->getJiraUsername(),
-            $syncOptions->getFillIssueID(),
-            '',
-            $syncOptions->isNotifyUsers()
+            $syncOptions->getJiraUserId(),
+            $syncOptions->getJiraUsername()
         );
-
         $service->setLogger($logger);
 
         return $service;
