@@ -24,7 +24,7 @@ class SyncServiceFactory implements FactoryInterface
 
         $api = new Api(
             $syncOptions->getJiraUrl(),
-            new Basic($syncOptions->getJiraLoginUsername() ?? $syncOptions->getJiraUsername(), $syncOptions->getJiraPassword())
+            new Basic((!empty($syncOptions->getJiraLoginUsername()) ? $syncOptions->getJiraLoginUsername() : $syncOptions->getJiraUsername()), $syncOptions->getJiraPassword())
         );
 
         $togglClient = TogglClient::factory(['api_key' => $syncOptions->getTogglApiKey(), 'apiVersion' => 'v8']);
