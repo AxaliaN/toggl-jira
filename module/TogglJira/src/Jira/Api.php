@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace TogglJira\Jira;
 
 use chobie\Jira\Api as BaseApi;
+use Exception;
 
 class Api extends BaseApi
 {
@@ -20,13 +21,15 @@ class Api extends BaseApi
 
     /**
      * @param string $issueID
-     * @param int $seconds
+     * @param int    $seconds
      * @param string $accountId
      * @param string $comment
      * @param string $created
-     * @param bool $overwrite
+     * @param bool   $overwrite
+     * @param bool   $notifyUsers
+     *
      * @return array|BaseApi\Result|false
-     * @throws \Exception
+     * @throws Exception
      */
     public function addWorkLogEntry(
         string $issueID,
@@ -34,8 +37,10 @@ class Api extends BaseApi
         string $accountId,
         string $comment,
         string $created,
-        bool $overwrite
+        bool $overwrite,
+        bool $notifyUsers = TRUE
     ) {
+        $notify = $notifyUsers ? 'true' : 'false';
         $params = [
             'timeSpentSeconds' => $seconds,
             'author' => [
@@ -62,7 +67,7 @@ class Api extends BaseApi
                 if (!$overwrite) {
                     return $this->api(
                         self::REQUEST_PUT,
-                        "/rest/api/2/issue/{$issueID}/worklog/{$workLog['id']}?adjustEstimate=auto",
+                        "/rest/api/2/issue/{$issueID}/worklog/{$workLog['id']}?adjustEstimate=auto&notifyUsers={$notify}",
                         $params
                     );
                 }
@@ -76,6 +81,6 @@ class Api extends BaseApi
             }
         }
 
-        return $this->api(self::REQUEST_POST, "/rest/api/2/issue/{$issueID}/worklog?adjustEstimate=auto", $params);
+        return $this->api(self::REQUEST_POST, "/rest/api/2/issue/{$issueID}/worklog?adjustEstimate=auto&notifyUsers={$notify}", $params);
     }
 }

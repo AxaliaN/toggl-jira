@@ -53,12 +53,18 @@ class SyncService implements LoggerAwareInterface
     private $fillIssueComment;
 
     /**
-     * @param Api $api
-     * @param GuzzleClient $togglClient
+     * @var bool
+     */
+    private $notifyUsers;
+
+    /**
+     * @param Api             $api
+     * @param GuzzleClient    $togglClient
      * @param WorkLogHydrator $workLogHydrator
-     * @param string $username
-     * @param string|null $fillIssueID
-     * @param string $fillIssueComment
+     * @param string          $username
+     * @param string|null     $fillIssueID
+     * @param string          $fillIssueComment
+     * @param bool            $notifyUsers
      */
     public function __construct(
         Api $api,
@@ -66,7 +72,8 @@ class SyncService implements LoggerAwareInterface
         WorkLogHydrator $workLogHydrator,
         string $username,
         string $fillIssueID = null,
-        string $fillIssueComment = ''
+        string $fillIssueComment = '',
+        bool $notifyUsers = TRUE
     ) {
         $this->api = $api;
         $this->togglClient = $togglClient;
@@ -74,6 +81,7 @@ class SyncService implements LoggerAwareInterface
         $this->username = $username;
         $this->fillIssueID = $fillIssueID;
         $this->fillIssueComment = $fillIssueComment;
+        $this->notifyUsers = $notifyUsers;
     }
 
     /**
@@ -128,7 +136,7 @@ class SyncService implements LoggerAwareInterface
                 $workLogs = $this->fillTimeToFull($workLogs, $clonedStartDate);
             }
 
-            $this->addWorkLogsToApi($workLogs, $user, $overwrite);
+            $this->addWorkLogsToApi($workLogs, $user, $overwrite, $this->notifyUsers);
         }
 
         $this->logger->info('All done for today, time to go home!');
@@ -251,10 +259,12 @@ class SyncService implements LoggerAwareInterface
     /**
      * @param array $workLogEntries
      * @param array $user
-     * @param bool $overwrite
+     * @param bool  $overwrite
+     * @param bool  $notifyUsers
+     *
      * @return void
      */
-    private function addWorkLogsToApi(array $workLogEntries, array $user, bool $overwrite): void
+    private function addWorkLogsToApi(array $workLogEntries, array $user, bool $overwrite, bool $notifyUsers = TRUE): void
     {
         /** @var WorkLogEntry $workLogEntry */
         foreach ($workLogEntries as $workLogEntry) {
@@ -265,7 +275,8 @@ class SyncService implements LoggerAwareInterface
                     $user['accountId'],
                     $workLogEntry->getComment(),
                     $workLogEntry->getSpentOn()->format('Y-m-d\TH:i:s.vO'),
-                    $overwrite
+                    $overwrite,
+                    $notifyUsers
                 );
 
                 if (isset($result->getResult()['errorMessages']) && \count($result->getResult()['errorMessages']) > 0) {

@@ -24,7 +24,7 @@ class SyncServiceFactory implements FactoryInterface
 
         $api = new Api(
             $syncOptions->getJiraUrl(),
-            new Basic($syncOptions->getJiraUsername(), $syncOptions->getJiraPassword())
+            new Basic($syncOptions->getJiraLoginUsername() ?? $syncOptions->getJiraUsername(), $syncOptions->getJiraPassword())
         );
 
         $togglClient = TogglClient::factory(['api_key' => $syncOptions->getTogglApiKey(), 'apiVersion' => 'v8']);
@@ -36,7 +36,9 @@ class SyncServiceFactory implements FactoryInterface
             $togglClient,
             new WorkLogHydrator(),
             $syncOptions->getJiraUsername(),
-            $syncOptions->getFillIssueID()
+            $syncOptions->getFillIssueID(),
+            '',
+            $syncOptions->isNotifyUsers()
         );
 
         $service->setLogger($logger);

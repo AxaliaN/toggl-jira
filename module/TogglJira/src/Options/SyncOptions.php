@@ -20,6 +20,11 @@ class SyncOptions extends AbstractOptions
     /**
      * @var string
      */
+    private $jiraLoginUsername;
+
+    /**
+     * @var string
+     */
     private $jiraPassword;
 
     /**
@@ -41,6 +46,11 @@ class SyncOptions extends AbstractOptions
      * @var string
      */
     private $fillIssueComment;
+
+    /**
+     * @var bool
+     */
+    private $notifyUsers;
 
     /**
      * @param array|null $options
@@ -99,6 +109,23 @@ class SyncOptions extends AbstractOptions
     public function setJiraUsername(string $jiraUsername): void
     {
         $this->jiraUsername = $jiraUsername;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getJiraLoginUsername(): string
+    {
+        return $this->jiraLoginUsername;
+    }
+
+    /**
+     * @param string $jiraLoginUsername
+     */
+    public function setJiraLoginUsername(string $jiraLoginUsername): void
+    {
+        $this->jiraLoginUsername = $jiraLoginUsername;
     }
 
     /**
@@ -166,6 +193,22 @@ class SyncOptions extends AbstractOptions
     }
 
     /**
+     * @return bool
+     */
+    public function isNotifyUsers(): bool
+    {
+        return $this->notifyUsers;
+    }
+
+    /**
+     * @param bool $notifyUsers
+     */
+    public function setNotifyUsers(bool $notifyUsers): void
+    {
+        $this->notifyUsers = $notifyUsers;
+    }
+
+    /**
      * @return array
      */
     public function toArray(): array
@@ -174,10 +217,12 @@ class SyncOptions extends AbstractOptions
             'lastSync' => $this->getLastSync(),
             'jiraUrl' => $this->getJiraUrl(),
             'jiraUsername' => $this->getJiraUsername(),
+            'jiraLoginUsername' => $this->getJiraLoginUsername(),
             'jiraPassword' => $this->getJiraPassword(),
             'togglApiKey' => $this->getTogglApiKey(),
             'fillIssueID' => $this->getFillIssueID(),
             'fillIssueComment' => $this->getFillIssueComment(),
+            'notifyUsers' => $this->isNotifyUsers(),
         ];
     }
 }
