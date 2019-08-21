@@ -38,7 +38,7 @@ class Api extends BaseApi
         string $comment,
         string $created,
         bool $overwrite,
-        bool $notifyUsers = TRUE
+        bool $notifyUsers = true
     ) {
         $notify = $notifyUsers ? 'true' : 'false';
         $params = [

@@ -73,7 +73,7 @@ class SyncService implements LoggerAwareInterface
         string $username,
         string $fillIssueID = null,
         string $fillIssueComment = '',
-        bool $notifyUsers = TRUE
+        bool $notifyUsers = true
     ) {
         $this->api = $api;
         $this->togglClient = $togglClient;
@@ -128,8 +128,7 @@ class SyncService implements LoggerAwareInterface
             // Don't fill the current day, since the day might not be over yet
             // Otherwise, use the filler issue to add the remaining time in order to have the full day filled
             // Also, only for week days
-            if (
-                $this->fillIssueID &&
+            if ($this->fillIssueID &&
                 $clonedStartDate->format('d-m-Y') !== (new DateTime())->format('d-m-Y') &&
                 $clonedStartDate->format('N') <= 5
             ) {
@@ -264,8 +263,12 @@ class SyncService implements LoggerAwareInterface
      *
      * @return void
      */
-    private function addWorkLogsToApi(array $workLogEntries, array $user, bool $overwrite, bool $notifyUsers = TRUE): void
-    {
+    private function addWorkLogsToApi(
+        array $workLogEntries,
+        array $user,
+        bool $overwrite,
+        bool $notifyUsers = true
+    ): void {
         /** @var WorkLogEntry $workLogEntry */
         foreach ($workLogEntries as $workLogEntry) {
             try {
