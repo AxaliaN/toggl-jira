@@ -23,7 +23,7 @@ class ApiTest extends TestCase
         $clientMock->shouldReceive('sendRequest')
             ->with(
                 Api::REQUEST_POST,
-                "/rest/api/2/issue/DVA-42/worklog?adjustEstimate=auto",
+                "/rest/api/2/issue/DVA-42/worklog?adjustEstimate=auto&notifyUsers=true",
                 [
                     'timeSpentSeconds' => 9001,
                     'author' => [
@@ -77,7 +77,7 @@ class ApiTest extends TestCase
         $clientMock->shouldReceive('sendRequest')
             ->with(
                 Api::REQUEST_PUT,
-                "/rest/api/2/issue/DVA-42/worklog/42?adjustEstimate=auto",
+                "/rest/api/2/issue/DVA-42/worklog/42?adjustEstimate=auto&notifyUsers=true",
                 [
                     'timeSpentSeconds' => 9001,
                     'author' => ['accountId' => 'D-Va'],

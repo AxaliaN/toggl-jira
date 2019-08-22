@@ -53,12 +53,18 @@ class SyncService implements LoggerAwareInterface
     private $fillIssueComment;
 
     /**
-     * @param Api $api
-     * @param GuzzleClient $togglClient
+     * @var bool
+     */
+    private $notifyUsers;
+
+    /**
+     * @param Api             $api
+     * @param GuzzleClient    $togglClient
      * @param WorkLogHydrator $workLogHydrator
-     * @param string $username
-     * @param string|null $fillIssueID
-     * @param string $fillIssueComment
+     * @param string          $username
+     * @param string|null     $fillIssueID
+     * @param string          $fillIssueComment
+     * @param bool            $notifyUsers
      */
     public function __construct(
         Api $api,
@@ -66,7 +72,8 @@ class SyncService implements LoggerAwareInterface
         WorkLogHydrator $workLogHydrator,
         string $username,
         string $fillIssueID = null,
-        string $fillIssueComment = ''
+        string $fillIssueComment = '',
+        bool $notifyUsers = true
     ) {
         $this->api = $api;
         $this->togglClient = $togglClient;
@@ -74,6 +81,7 @@ class SyncService implements LoggerAwareInterface
         $this->username = $username;
         $this->fillIssueID = $fillIssueID;
         $this->fillIssueComment = $fillIssueComment;
+        $this->notifyUsers = $notifyUsers;
     }
 
     /**
@@ -120,15 +128,14 @@ class SyncService implements LoggerAwareInterface
             // Don't fill the current day, since the day might not be over yet
             // Otherwise, use the filler issue to add the remaining time in order to have the full day filled
             // Also, only for week days
-            if (
-                $this->fillIssueID &&
+            if ($this->fillIssueID &&
                 $clonedStartDate->format('d-m-Y') !== (new DateTime())->format('d-m-Y') &&
                 $clonedStartDate->format('N') <= 5
             ) {
                 $workLogs = $this->fillTimeToFull($workLogs, $clonedStartDate);
             }
 
-            $this->addWorkLogsToApi($workLogs, $user, $overwrite);
+            $this->addWorkLogsToApi($workLogs, $user, $overwrite, $this->notifyUsers);
         }
 
         $this->logger->info('All done for today, time to go home!');
@@ -251,11 +258,17 @@ class SyncService implements LoggerAwareInterface
     /**
      * @param array $workLogEntries
      * @param array $user
-     * @param bool $overwrite
+     * @param bool  $overwrite
+     * @param bool  $notifyUsers
+     *
      * @return void
      */
-    private function addWorkLogsToApi(array $workLogEntries, array $user, bool $overwrite): void
-    {
+    private function addWorkLogsToApi(
+        array $workLogEntries,
+        array $user,
+        bool $overwrite,
+        bool $notifyUsers = true
+    ): void {
         /** @var WorkLogEntry $workLogEntry */
         foreach ($workLogEntries as $workLogEntry) {
             try {
@@ -265,7 +278,8 @@ class SyncService implements LoggerAwareInterface
                     $user['accountId'],
                     $workLogEntry->getComment(),
                     $workLogEntry->getSpentOn()->format('Y-m-d\TH:i:s.vO'),
-                    $overwrite
+                    $overwrite,
+                    $notifyUsers
                 );
 
                 if (isset($result->getResult()['errorMessages']) && \count($result->getResult()['errorMessages']) > 0) {

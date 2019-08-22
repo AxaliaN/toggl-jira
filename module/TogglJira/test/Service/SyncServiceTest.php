@@ -125,7 +125,8 @@ class SyncServiceTest extends TestCase
             'D-Va',
             $workLogEntry->getComment(),
             '2018-02-15T00:00:00.000+0100',
-            false
+            false,
+            true
         )->andReturn($result);
         $this->apiMock->shouldReceive('addWorkLogEntry')->with(
             'FOO-01',
@@ -133,7 +134,8 @@ class SyncServiceTest extends TestCase
             'D-Va',
             'Support',
             '2017-05-15T23:59:59.000+0200',
-            false
+            false,
+            true
         )->andReturn($result);
 
         $this->loggerMock
@@ -243,7 +245,8 @@ class SyncServiceTest extends TestCase
             'D-Va',
             'Support',
             '2017-04-15T23:59:59.000+0000',
-            false
+            false,
+            true
         )->andReturn($result);
 
         $this->loggerMock->shouldReceive('warning')
