@@ -71,3 +71,7 @@ You can also install Composer dependencies like this, which ensures they get ins
 
 docker-compose run --rm php composer install
 ```
+
+# Thanks
+
+I couldn't have done it without the help of Timon Bolier and from the community, wizonesolutions for his Docker implementation :)
