@@ -15,7 +15,7 @@ build:
     environment:
         timezone: 'Europe/Amsterdam'
         php:
-            version: '7.1'
+            version: '7.3'
             ini:
                 'date.timezone': 'Europe/Amsterdam'
     # Run after dependencies
