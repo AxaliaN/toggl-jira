@@ -5,6 +5,7 @@ namespace TogglJira\Service;
 
 use AJT\Toggl\TogglClient;
 use chobie\Jira\Api\Authentication\Basic;
+use Exception;
 use Interop\Container\ContainerInterface;
 use TogglJira\Hydrator\WorkLogHydrator;
 use TogglJira\Jira\Api;
@@ -14,8 +15,7 @@ use Zend\ServiceManager\Factory\FactoryInterface;
 class SyncServiceFactory implements FactoryInterface
 {
     /**
-     * {@inheritdoc}
-     * @throws \Exception
+     * @throws Exception
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): SyncService
     {

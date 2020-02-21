@@ -8,10 +8,6 @@ use Exception;
 
 class Api extends BaseApi
 {
-    /**
-     * @param string $username
-     * @return array
-     */
     public function getUser(string $username): array
     {
         $userDetails = $this->api(self::REQUEST_GET, "/rest/api/2/user", ['username' => $username]);
@@ -20,21 +16,13 @@ class Api extends BaseApi
     }
 
     /**
-     * @param string $issueID
-     * @param int    $seconds
-     * @param string $accountId
-     * @param string $comment
-     * @param string $created
-     * @param bool   $overwrite
-     * @param bool   $notifyUsers
-     *
      * @return array|BaseApi\Result|false
      * @throws Exception
      */
     public function addWorkLogEntry(
         string $issueID,
         int $seconds,
-        string $accountId,
+        string $userKey,
         string $comment,
         string $created,
         bool $overwrite,
@@ -43,9 +31,6 @@ class Api extends BaseApi
         $notify = $notifyUsers ? 'true' : 'false';
         $params = [
             'timeSpentSeconds' => $seconds,
-            'author' => [
-                'accountId' => $accountId,
-            ],
             'comment' => $comment,
             'started' => $created,
         ];
@@ -59,8 +44,7 @@ class Api extends BaseApi
             foreach ($workLogResult['worklogs'] as $workLog) {
                 $workLogStartedDay = (new \DateTimeImmutable($workLog['started']))->format('Y-m-d');
 
-                if ($startedDay !== $workLogStartedDay ||
-                    $workLog['author']['accountId'] !== $accountId) {
+                if ($startedDay !== $workLogStartedDay || $workLog['author']['key'] !== $userKey) {
                     continue;
                 }
 

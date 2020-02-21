@@ -10,7 +10,7 @@ use TogglJiraTest\BaseContainerTest;
 
 class CommandHandlerFactoryTest extends BaseContainerTest
 {
-    public function testInvoke()
+    public function testInvoke(): void
     {
         $factory = new CommandHandlerFactory();
 

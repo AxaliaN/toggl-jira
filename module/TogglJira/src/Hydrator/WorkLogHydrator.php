@@ -3,19 +3,13 @@ declare(strict_types=1);
 
 namespace TogglJira\Hydrator;
 
+use Exception;
 use TogglJira\Entity\WorkLogEntry;
 use Zend\Hydrator\HydratorInterface;
 
 class WorkLogHydrator implements HydratorInterface
 {
-
-    /**
-     * Extract values from an object
-     *
-     * @param  WorkLogEntry $object
-     * @return array
-     */
-    public function extract($object)
+    public function extract($object): array
     {
         return [
             'issueID' => $object->getIssueID(),
@@ -26,15 +20,11 @@ class WorkLogHydrator implements HydratorInterface
     }
 
     /**
-     * Hydrate $object with the provided $data.
-     *
-     * @param  array $data
-     * @param  WorkLogEntry $object
-     * @return object
-     * @throws \Exception
+     * @throws Exception
      */
     public function hydrate(array $data, $object): WorkLogEntry
     {
+        /** @var WorkLogEntry $object */
         if (isset($data['issueID'])) {
             $object->setIssueID($data['issueID']);
         }

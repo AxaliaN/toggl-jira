@@ -3,15 +3,21 @@ declare(strict_types=1);
 
 namespace TogglJiraTest\Options;
 
+use Exception;
+use Interop\Container\Exception\ContainerException;
 use TogglJira\Options\SyncOptions;
 use TogglJira\Options\SyncOptionsFactory;
 use TogglJiraTest\BaseContainerTest;
 
+use function file_exists;
+use function rename;
+use function unlink;
+
 class SyncOptionsFactoryTest extends BaseContainerTest
 {
     /**
-     * @return void
-     * @throws \Interop\Container\Exception\ContainerException
+     * @throws Exception
+     * @throws ContainerException
      */
     public function testInvoke(): void
     {
@@ -36,14 +42,14 @@ class SyncOptionsFactoryTest extends BaseContainerTest
         $this->assertInstanceOf(SyncOptions::class, $instance);
     }
 
-    public function tearDown()/* The :void return type declaration that should be here would cause a BC issue */
+    public function tearDown(): void
     {
         parent::tearDown();
 
-        \unlink(__DIR__ . '/../../../../config.json');
+        unlink(__DIR__ . '/../../../../config.json');
 
-        if (\file_exists(__DIR__ . '/../../../../config.json.bak')) {
-            \rename(__DIR__ . '/../../../../config.json.bak', __DIR__ . '/../../../../config.json');
+        if (file_exists(__DIR__ . '/../../../../config.json.bak')) {
+            rename(__DIR__ . '/../../../../config.json.bak', __DIR__ . '/../../../../config.json');
         }
     }
 }

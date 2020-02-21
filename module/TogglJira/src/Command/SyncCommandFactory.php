@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace TogglJira\Command;
 
+use Exception;
 use Interop\Container\ContainerInterface;
 use TogglJira\Options\SyncOptions;
 use TogglJira\Service\SyncService;
@@ -13,8 +14,7 @@ class SyncCommandFactory implements FactoryInterface
 {
 
     /**
-     * {@inheritdoc}
-     * @throws \Exception
+     * @throws Exception
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): SyncCommand
     {

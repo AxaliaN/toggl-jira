@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace TogglJira;
 
 use Zend\Console\Console;
+use Zend\Console\Exception\InvalidArgumentException;
+use Zend\Console\Exception\RuntimeException;
 use Zend\Mvc\Application as MvcApplication;
 use ZF\Console\Application as ConsoleApplication;
 use ZF\Console\Dispatcher;
@@ -15,19 +17,14 @@ class Bootstrap
      */
     private $mvcApp;
 
-    /**
-     * Bootstrap constructor.
-     * @param array $configuration
-     */
     public function __construct(array $configuration)
     {
         $this->mvcApp = MvcApplication::init($configuration);
     }
 
     /**
-     * @return ConsoleApplication
-     * @throws \Zend\Console\Exception\RuntimeException
-     * @throws \Zend\Console\Exception\InvalidArgumentException
+     * @throws RuntimeException
+     * @throws InvalidArgumentException
      */
     public function setupConsoleApp(): ConsoleApplication
     {
@@ -50,17 +47,11 @@ class Bootstrap
         return $application;
     }
 
-    /**
-     * @return array
-     */
     private function readRoutesFromMvc(): array
     {
         return $this->mvcApp->getConfig()['console']['routes'] ?: [];
     }
 
-    /**
-     * @return string
-     */
     private function locateExceptionHandlerTemplate(): string
     {
         return $this->mvcApp->getConfig()['exception_handler']['template'] ?: '';

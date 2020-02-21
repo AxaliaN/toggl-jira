@@ -12,7 +12,7 @@ use TogglJiraTest\BaseContainerTest;
 
 class SyncCommandFactoryTest extends BaseContainerTest
 {
-    public function testInvoke()
+    public function testInvoke(): void
     {
         $syncOptionMock = \Mockery::mock(SyncOptions::class);
         $syncServiceMock = \Mockery::mock(SyncService::class);

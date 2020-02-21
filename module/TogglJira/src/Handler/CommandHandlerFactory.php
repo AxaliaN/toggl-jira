@@ -8,9 +8,6 @@ use Zend\ServiceManager\Factory\FactoryInterface;
 
 class CommandHandlerFactory implements FactoryInterface
 {
-    /**
-     * {@inheritdoc}
-     */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null): CommandHandler
     {
         $commandHandler = new CommandHandler($container);

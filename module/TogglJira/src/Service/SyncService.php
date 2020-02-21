@@ -9,6 +9,7 @@ use DateTime;
 use DateTimeInterface;
 use Exception;
 use GuzzleHttp\Command\Guzzle\GuzzleClient;
+use InvalidArgumentException;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use RuntimeException;
@@ -57,15 +58,6 @@ class SyncService implements LoggerAwareInterface
      */
     private $notifyUsers;
 
-    /**
-     * @param Api             $api
-     * @param GuzzleClient    $togglClient
-     * @param WorkLogHydrator $workLogHydrator
-     * @param string          $username
-     * @param string|null     $fillIssueID
-     * @param string          $fillIssueComment
-     * @param bool            $notifyUsers
-     */
     public function __construct(
         Api $api,
         GuzzleClient $togglClient,
@@ -85,10 +77,6 @@ class SyncService implements LoggerAwareInterface
     }
 
     /**
-     * @param DateTimeInterface $startDate
-     * @param DateTimeInterface $endDate
-     * @param bool $overwrite
-     * @return void
      * @throws Exception
      */
     public function sync(DateTimeInterface $startDate, DateTimeInterface $endDate, bool $overwrite): void
@@ -99,8 +87,8 @@ class SyncService implements LoggerAwareInterface
 
         $user = $this->api->getUser($this->username);
 
-        if (!isset($user['accountId'])) {
-            throw new RuntimeException("User with username {$this->username} not found");
+        if (!isset($user['key'])) {
+            throw new InvalidArgumentException(sprintf('No user found for username %s.', $this->username));
         }
 
         // Iterate over each day and process all time entries.
@@ -135,17 +123,12 @@ class SyncService implements LoggerAwareInterface
                 $workLogs = $this->fillTimeToFull($workLogs, $clonedStartDate);
             }
 
-            $this->addWorkLogsToApi($workLogs, $user, $overwrite, $this->notifyUsers);
+            $this->addWorkLogsToApi($workLogs, $user['key'], $overwrite, $this->notifyUsers);
         }
 
         $this->logger->info('All done for today, time to go home!');
     }
 
-    /**
-     * @param DateTimeInterface $startDate
-     * @param DateTimeInterface $endDate
-     * @return array|null
-     */
     private function getTimeEntries(DateTimeInterface $startDate, DateTimeInterface $endDate): ?array
     {
         try {
@@ -167,8 +150,6 @@ class SyncService implements LoggerAwareInterface
     }
 
     /**
-     * @param array $timeEntries
-     * @return array
      * @throws Exception
      */
     private function parseTimeEntries(array $timeEntries): array
@@ -202,14 +183,12 @@ class SyncService implements LoggerAwareInterface
     }
 
     /**
-     * @param array $timeEntry
-     * @return WorkLogEntry|null
      * @throws Exception
      */
     private function parseTimeEntry(array $timeEntry): ?WorkLogEntry
     {
         $data = [
-            'issueID' => explode(' ', $timeEntry['description'])[0],
+            'issueID' => str_replace(':', '', explode(' ', $timeEntry['description'])[0]),
             'timeSpent' => $timeEntry['duration'],
             'comment' => $timeEntry['description'],
             'spentOn' => $timeEntry['start']
@@ -230,11 +209,6 @@ class SyncService implements LoggerAwareInterface
         return $this->workLogHydrator->hydrate($data, new WorkLogEntry());
     }
 
-    /**
-     * @param $existingWorkLog
-     * @param $newWorkLog
-     * @return WorkLogEntry
-     */
     private function addTimeToExistingTimeEntry(WorkLogEntry $existingWorkLog, WorkLogEntry $newWorkLog): WorkLogEntry
     {
         $timeSpent = $existingWorkLog->getTimeSpent();
@@ -255,17 +229,9 @@ class SyncService implements LoggerAwareInterface
         return $existingWorkLog;
     }
 
-    /**
-     * @param array $workLogEntries
-     * @param array $user
-     * @param bool  $overwrite
-     * @param bool  $notifyUsers
-     *
-     * @return void
-     */
     private function addWorkLogsToApi(
         array $workLogEntries,
-        array $user,
+        string $userKey,
         bool $overwrite,
         bool $notifyUsers = true
     ): void {
@@ -275,7 +241,7 @@ class SyncService implements LoggerAwareInterface
                 $result = $this->api->addWorkLogEntry(
                     $workLogEntry->getIssueID(),
                     $workLogEntry->getTimeSpent(),
-                    $user['accountId'],
+                    $userKey,
                     $workLogEntry->getComment(),
                     $workLogEntry->getSpentOn()->format('Y-m-d\TH:i:s.vO'),
                     $overwrite,
@@ -299,17 +265,13 @@ class SyncService implements LoggerAwareInterface
         }
     }
 
-    /**
-     * @param array $workLogEntries
-     * @return array
-     */
     private function fillTimeToFull(array $workLogEntries, DateTime $processDate): array
     {
         $timeSpent = 0;
 
         /** @var WorkLogEntry $workLogEntry */
         foreach ($workLogEntries as $workLogEntry) {
-            if ($workLogEntry->getIssueID() == $this->fillIssueID) {
+            if ($workLogEntry->getIssueID() === $this->fillIssueID) {
                 $fillIssue = $workLogEntry;
             }
 

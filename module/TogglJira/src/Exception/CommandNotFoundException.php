@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace TogglJira\Exception;
 
-class CommandNotFoundException extends \Exception
+use Exception;
+
+class CommandNotFoundException extends Exception
 {
 }

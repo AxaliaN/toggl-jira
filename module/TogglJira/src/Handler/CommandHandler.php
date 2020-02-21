@@ -3,11 +3,15 @@ declare(strict_types=1);
 
 namespace TogglJira\Handler;
 
+use Exception;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use TogglJira\Exception\CommandNotFoundException;
 use Zend\Console\Adapter\AdapterInterface;
+use Zend\Console\Exception\RuntimeException;
 use Zend\Console\Request;
 use ZF\Console\Route;
 
@@ -20,21 +24,15 @@ class CommandHandler implements LoggerAwareInterface
      */
     private $container;
 
-    /**
-     * @param ContainerInterface $container
-     */
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
     }
 
     /**
-     * @param Route $route
-     * @param AdapterInterface $console
-     * @return int
-     * @throws \Zend\Console\Exception\RuntimeException
-     * @throws \Psr\Container\NotFoundExceptionInterface
-     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws RuntimeException
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
      * @throws CommandNotFoundException
      */
     public function __invoke(Route $route, AdapterInterface $console): int
@@ -53,7 +51,7 @@ class CommandHandler implements LoggerAwareInterface
 
         try {
             return $command->execute($request, $console);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error($e->getMessage(), ['context' => $e]);
         }
 
