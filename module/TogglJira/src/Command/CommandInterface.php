@@ -9,10 +9,5 @@ use Zend\Console\Request;
 
 interface CommandInterface
 {
-    /**
-     * @param Request $request
-     * @param AdapterInterface|Console $console
-     * @return int
-     */
     public function execute(Request $request, AdapterInterface $console): int;
 }

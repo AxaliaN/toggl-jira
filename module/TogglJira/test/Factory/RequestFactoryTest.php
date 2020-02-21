@@ -9,7 +9,7 @@ use Zend\Console\Request;
 
 class RequestFactoryTest extends BaseContainerTest
 {
-    public function testInvoke()
+    public function testInvoke(): void
     {
         $factory = new RequestFactory();
 

@@ -20,9 +20,6 @@ class BaseContainerTest extends TestCase
         Mockery::close();
     }
 
-    /**
-     * @return void
-     */
     protected function setUp(): void
     {
         Mockery::getConfiguration()->allowMockingNonExistentMethods(false);
@@ -30,9 +27,6 @@ class BaseContainerTest extends TestCase
         parent::setUp();
     }
 
-    /**
-     * @return MockInterface
-     */
     protected function getContainer(): MockInterface
     {
         if ($this->container === null) {

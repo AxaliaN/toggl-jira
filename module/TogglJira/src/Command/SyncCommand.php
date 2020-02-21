@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace TogglJira\Command;
 
+use Exception;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use TogglJira\Options\SyncOptions;
@@ -30,11 +31,6 @@ class SyncCommand implements CommandInterface, LoggerAwareInterface
      */
     private $writer;
 
-    /**
-     * @param SyncService $service
-     * @param SyncOptions $syncOptions
-     * @param Json $writer
-     */
     public function __construct(SyncService $service, SyncOptions $syncOptions, Json $writer)
     {
         $this->service = $service;
@@ -43,10 +39,7 @@ class SyncCommand implements CommandInterface, LoggerAwareInterface
     }
 
     /**
-     * @param Request $request
-     * @param AdapterInterface $console
-     * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     public function execute(Request $request, AdapterInterface $console): int
     {

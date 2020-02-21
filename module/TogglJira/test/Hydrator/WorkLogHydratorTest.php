@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace TogglJiraTest\Hydrator;
 
+use Exception;
 use PHPUnit\Framework\TestCase;
 use TogglJira\Entity\WorkLogEntry;
 use TogglJira\Hydrator\WorkLogHydrator;
@@ -10,8 +11,7 @@ use TogglJira\Hydrator\WorkLogHydrator;
 class WorkLogHydratorTest extends TestCase
 {
     /**
-     * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function testHydrate(): void
     {
@@ -33,8 +33,7 @@ class WorkLogHydratorTest extends TestCase
     }
 
     /**
-     * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function testExtract(): void
     {

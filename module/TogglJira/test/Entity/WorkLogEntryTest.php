@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace TogglJiraTest\Entity;
 
+use Exception;
 use PHPUnit\Framework\TestCase;
 use TogglJira\Entity\WorkLogEntry;
 
@@ -13,17 +14,13 @@ class WorkLogEntryTest extends TestCase
      */
     private $entity;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         $this->entity = new WorkLogEntry();
     }
 
     /**
-     * @throws \Exception
-     * @return void
+     * @throws Exception
      */
     public function testAccessors(): void
     {

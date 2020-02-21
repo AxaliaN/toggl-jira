@@ -1,5 +1,5 @@
 {
-    "name": "AxaliaN/toggl-jira",
+    "name": "axalian/toggl-jira",
     "description": "A sync tool to log time logged in Toggl to Jira issues",
     "type": "project",
     "license": "BSD-3-Clause",
@@ -8,10 +8,10 @@
         "jira",
         "zf"
     ],
-    "homepage": "http://framework.zend.com/",
+    "homepage": "https://github.com/AxaliaN/toggl-jira",
     "minimum-stability": "dev",
     "require": {
-        "php": "^7.1",
+        "php": "^7.3",
         "zfcampus/zf-console": "^1.4",
         "zendframework/zend-mvc": "^3.1",
         "zendframework/zend-log": "^2.9",

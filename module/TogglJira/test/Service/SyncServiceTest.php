@@ -5,7 +5,10 @@ namespace TogglJiraTest\Service;
 
 use AJT\Toggl\TogglClient;
 use DateTime;
+use Exception;
 use GuzzleHttp\Command\Result;
+use InvalidArgumentException;
+use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -42,19 +45,16 @@ class SyncServiceTest extends TestCase
      */
     private $service;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
-        \Mockery::getConfiguration()->allowMockingNonExistentMethods(true);
+        Mockery::getConfiguration()->allowMockingNonExistentMethods(true);
 
         date_default_timezone_set('Europe/Amsterdam');
 
-        $this->apiMock = \Mockery::mock(Api::class);
-        $this->togglClientMock = \Mockery::mock(TogglClient::class);
-        $this->hydratorMock = \Mockery::mock(WorkLogHydrator::class);
-        $this->loggerMock = \Mockery::mock(LoggerInterface::class);
+        $this->apiMock = Mockery::mock(Api::class);
+        $this->togglClientMock = Mockery::mock(TogglClient::class);
+        $this->hydratorMock = Mockery::mock(WorkLogHydrator::class);
+        $this->loggerMock = Mockery::mock(LoggerInterface::class);
 
         $this->service = new SyncService(
             $this->apiMock,
@@ -69,8 +69,7 @@ class SyncServiceTest extends TestCase
     }
 
     /**
-     * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function testSync(): void
     {
@@ -111,12 +110,12 @@ class SyncServiceTest extends TestCase
         $this->hydratorMock->shouldReceive('hydrate')->andReturn($workLogEntry);
 
         $user = [
-            'accountId' => 'D-Va'
+            'key' => 'D-Va'
         ];
 
         $this->apiMock->shouldReceive('getUser')->andReturn($user);
 
-        $result = \Mockery::mock(Result::class);
+        $result = Mockery::mock(Result::class);
         $result->shouldReceive('getResult')->twice();
 
         $this->apiMock->shouldReceive('addWorkLogEntry')->with(
@@ -162,6 +161,7 @@ class SyncServiceTest extends TestCase
                 'Saved worklog entry',
                 ['issueID' => 'SLR-76', 'spentOn' => '2018-02-15', 'timeSpent' => '0.04 hours']
             );
+
         $this->loggerMock
             ->shouldReceive('info')
             ->with(
@@ -175,8 +175,7 @@ class SyncServiceTest extends TestCase
     }
 
     /**
-     * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function testExceptionOnTogglError(): void
     {
@@ -184,17 +183,16 @@ class SyncServiceTest extends TestCase
         $endDate = new DateTime('2017-04-16');
 
         $user = [
-            'accountId' => 'D-Va'
+            'key' => 'D-Va'
         ];
 
         $this->apiMock->shouldReceive('getUser')->andReturn($user);
 
         $this->togglClientMock->shouldReceive('getTimeEntries')
             ->with(['start_date' => '2017-04-15T00:00:00+02:00', 'end_date' => '2017-04-15T23:59:59+02:00'])
-            ->andThrow(\Exception::class, 'Nerf this!');
+            ->andThrow(Exception::class, 'Nerf this!');
 
-        $this->loggerMock->shouldReceive('error')
-            ->with('Failed to get time entries from Toggl', \Mockery::any());
+        $this->loggerMock->shouldReceive('error')->with('Failed to get time entries from Toggl', Mockery::any());
 
         $this->loggerMock->shouldReceive('info')->with('All done for today, time to go home!');
 
@@ -202,8 +200,7 @@ class SyncServiceTest extends TestCase
     }
 
     /**
-     * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function testSyncWithInvalidTimeEntries(): void
     {
@@ -232,12 +229,12 @@ class SyncServiceTest extends TestCase
             ->andReturn($result);
 
         $user = [
-            'accountId' => 'D-Va'
+            'key' => 'D-Va'
         ];
 
         $this->apiMock->shouldReceive('getUser')->andReturn($user);
 
-        $result = \Mockery::mock(Result::class);
+        $result = Mockery::mock(Result::class);
 
         $this->apiMock->shouldReceive('addWorkLogEntry')->with(
             'FOO-01',
@@ -268,8 +265,7 @@ class SyncServiceTest extends TestCase
     }
 
     /**
-     * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function testSyncJiraException(): void
     {
@@ -277,7 +273,7 @@ class SyncServiceTest extends TestCase
         $endDate = new DateTime('2017-04-15');
 
         $user = [
-            'accountId' => 'D-Va'
+            'key' => 'D-Va'
         ];
 
         $this->apiMock->shouldReceive('getUser')->andReturn($user);
@@ -317,7 +313,7 @@ class SyncServiceTest extends TestCase
             'D-Va',
             $workLogEntry->getComment(),
             $workLogEntry->getSpentOn()->format('Y-m-d\TH:i:s.vO')
-        )->andThrow(\Exception::class, 'Nerf this!');
+        )->andThrow(Exception::class, 'Nerf this!');
 
         $this->loggerMock
             ->shouldReceive('info')
@@ -328,7 +324,7 @@ class SyncServiceTest extends TestCase
 
         $this->loggerMock
             ->shouldReceive('error')
-            ->with('Could not add worklog entry', \Mockery::any());
+            ->with('Could not add worklog entry', Mockery::any());
 
         $this->loggerMock
             ->shouldReceive('info')
@@ -343,13 +339,12 @@ class SyncServiceTest extends TestCase
     }
 
     /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage User with username D-Va not found
-     * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function testExceptionThrownOnUserNotFound(): void
     {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('No user found for username D-Va.');
         $startDate = new DateTime('2017-04-15');
         $endDate = new DateTime('2017-04-15');
         $this->apiMock->shouldReceive('getUser')->andReturn([]);
@@ -357,9 +352,9 @@ class SyncServiceTest extends TestCase
         $this->service->sync($startDate, $endDate, false);
     }
 
-    public function tearDown()/* The :void return type declaration that should be here would cause a BC issue */
+    public function tearDown(): void
     {
-        if ($container = \Mockery::getContainer()) {
+        if ($container = Mockery::getContainer()) {
             $this->addToAssertionCount($container->mockery_getExpectationCount());
         }
     }

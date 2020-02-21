@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace TogglJiraTest\Command;
 
+use Exception;
 use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -40,9 +41,6 @@ class SyncCommandTest extends TestCase
      */
     private $loggerMock;
 
-    /**
-     * @return void
-     */
     public function setUp(): void
     {
         $this->syncServiceMock = \Mockery::mock(SyncService::class);
@@ -55,8 +53,7 @@ class SyncCommandTest extends TestCase
     }
 
     /**
-     * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function testExecute(): void
     {

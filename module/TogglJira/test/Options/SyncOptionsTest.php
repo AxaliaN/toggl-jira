@@ -8,9 +8,6 @@ use TogglJira\Options\SyncOptions;
 
 class SyncOptionsTest extends TestCase
 {
-    /**
-     * @return void
-     */
     public function testAccessors(): void
     {
         $data = [
@@ -34,9 +31,6 @@ class SyncOptionsTest extends TestCase
         $this->assertTrue($syncOptions->isNotifyUsers());
     }
 
-    /**
-     * @return void
-     */
     public function testToArray(): void
     {
         $data = [

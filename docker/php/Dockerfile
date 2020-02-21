@@ -1,4 +1,4 @@
-FROM php:7.1.5-alpine
+FROM php:7.3.11-alpine
 WORKDIR /usr/src/toggl-jira
 
 # Install composer
