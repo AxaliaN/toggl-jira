@@ -10,23 +10,19 @@ class SyncOptions extends AbstractOptions
     /**
      * @var string
      */
-    private $jiraPassword;
-
+    private $jiraAccountId;
+    /**
+     * @var string
+     */
+    private $jiraApiKey;
+    /**
+     * @var string
+     */
+    private $jiraEmail;
     /**
      * @var string
      */
     private $jiraUrl;
-
-    /**
-     * @var string
-     */
-    private $jiraUserId;
-
-    /**
-     * @var string
-     */
-    private $jiraUsername;
-
     /**
      * @var \DateTimeInterface
      */
@@ -63,46 +59,30 @@ class SyncOptions extends AbstractOptions
     /**
      * @return string
      */
-    public function getJiraPassword(): string
+    public function getjiraApiKey(): string
     {
-        return $this->jiraPassword;
+        return $this->jiraApiKey;
     }
 
     /**
-     * @param string $jiraPassword
+     * @param string $jiraApiKey
      */
-    public function setJiraPassword(string $jiraPassword): void
+    public function setjiraApiKey(string $jiraApiKey): void
     {
-        $this->jiraPassword = $jiraPassword;
+        $this->jiraApiKey = $jiraApiKey;
     }
 
-    public function getJiraUserId(): string
+    public function getjiraAccountId(): string
     {
-        return $this->jiraUserId;
-    }
-
-    /**
-     * @param string $jiraUserId
-     */
-    public function setJiraUserId(string $jiraUserId): void
-    {
-        $this->jiraUserId = $jiraUserId;
+        return $this->jiraAccountId;
     }
 
     /**
-     * @return string
+     * @param string $jiraAccountId
      */
-    public function getJiraUsername(): string
+    public function setjiraAccountId(string $jiraAccountId): void
     {
-        return $this->jiraUsername;
-    }
-
-    /**
-     * @param string $jiraUsername
-     */
-    public function setJiraUsername(string $jiraUsername): void
-    {
-        $this->jiraUsername = $jiraUsername;
+        $this->jiraAccountId = $jiraAccountId;
     }
 
     /**
@@ -137,6 +117,20 @@ class SyncOptions extends AbstractOptions
         $this->jiraUrl = $jiraUrl;
     }
 
+
+    public function getjiraEmail(): string
+    {
+        return $this->jiraEmail;
+    }
+
+    /**
+     * @param string $jiraEmail
+     */
+    public function setJiraEmail(string $jiraEmail): void
+    {
+        $this->jiraEmail = $jiraEmail;
+    }
+
     /**
      * @return array
      */
@@ -145,9 +139,9 @@ class SyncOptions extends AbstractOptions
         return [
             'lastSync' => $this->getLastSync(),
             'jiraUrl' => $this->getJiraUrl(),
-            'jiraUserId' => $this->getJiraUserId(),
-            'jiraUsername' => $this->getJiraUsername(),
-            'jiraPassword' => $this->getJiraPassword(),
+            'jiraEmail' => $this->getjiraEmail(),
+            'jiraAccountId' => $this->getjiraAccountId(),
+            'jiraApiKey' => $this->getjiraApiKey(),
             'togglApiKey' => $this->getTogglApiKey(),
         ];
     }

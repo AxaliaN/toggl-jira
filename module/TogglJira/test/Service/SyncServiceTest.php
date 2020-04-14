@@ -307,7 +307,6 @@ class SyncServiceTest extends TestCase
 
     /**
      * @expectedException RuntimeException
-     * @expectedExceptionMessage User with username D-Va@bla.com not found
      * @return void
      * @throws \Exception
      */
@@ -315,7 +314,7 @@ class SyncServiceTest extends TestCase
     {
         $startDate = new DateTimeImmutable('2017-04-15T23:35:00.000+0200');
         $endDate = new DateTimeImmutable('2017-04-16T23:35:00.000+0200');
-        $this->apiMock->shouldReceive('getUser')->andReturn([]);
+        $this->apiMock->shouldReceive('getUser')->andReturn(['errorMessages' => ['error']]);
 
         $this->service->sync($startDate, $endDate, false);
     }

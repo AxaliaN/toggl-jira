@@ -30,12 +30,7 @@ class SyncService implements LoggerAwareInterface
     /**
      * @var string
      */
-    private $userId;
-
-    /**
-     * @var string
-     */
-    private $username;
+    private $accountId;
 
     /**
      * @var WorkLogHydrator
@@ -46,21 +41,18 @@ class SyncService implements LoggerAwareInterface
      * @param Api $api
      * @param GuzzleClient $togglClient
      * @param WorkLogHydrator $workLogHydrator
-     * @param string $userId
-     * @param string $username
+     * @param string $accountId
      */
     public function __construct(
         Api $api,
         GuzzleClient $togglClient,
         WorkLogHydrator $workLogHydrator,
-        string $userId,
-        string $username
+        string $accountId
     ) {
         $this->api = $api;
         $this->togglClient = $togglClient;
         $this->workLogHydrator = $workLogHydrator;
-        $this->userId = $userId;
-        $this->username = $username;
+        $this->accountId = $accountId;
     }
 
     /**
@@ -72,10 +64,10 @@ class SyncService implements LoggerAwareInterface
      */
     public function sync(\DateTimeInterface $startDate, \DateTimeInterface $endDate, bool $overwrite): void
     {
-        $user = $this->api->getUser($this->userId);
+        $user = $this->api->getUser($this->accountId);
 
-        if (!isset($user['accountId'])) {
-            throw new RuntimeException("User with username {$this->username} not found");
+        if (isset($user['errorMessages'])) {
+            throw new RuntimeException(implode("\n", $user['errorMessages']));
         }
 
         $timeEntries = $this->getTimeEntries($startDate, $endDate);

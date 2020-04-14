@@ -19,9 +19,9 @@ class SyncServiceFactoryTest extends BaseContainerTest
     {
         $syncOptionMock = \Mockery::mock(SyncOptions::class);
         $syncOptionMock->shouldReceive('getJiraUrl')->andReturn('http://www.example.com');
-        $syncOptionMock->shouldReceive('getJiraUserId')->andReturn('foo');
-        $syncOptionMock->shouldReceive('getJiraUsername')->andReturn('foo@bar.com');
-        $syncOptionMock->shouldReceive('getJiraPassword')->andReturn('bar');
+        $syncOptionMock->shouldReceive('getjiraEmail')->andReturn('foo@baz.com');
+        $syncOptionMock->shouldReceive('getjiraAccountId')->andReturn('foo');
+        $syncOptionMock->shouldReceive('getjiraApiKey')->andReturn('bar');
         $syncOptionMock->shouldReceive('getTogglApiKey')->andReturn('baz');
 
         $loggerMock = \Mockery::mock(LoggerInterface::class);

@@ -119,7 +119,7 @@ class ApiTest extends TestCase
                 Api::REQUEST_GET,
                 "/rest/api/2/user",
                 [
-                    'username' => 'D-Va',
+                    'accountId' => 'D-Va',
                 ],
                 'http://www.example.com',
                 $authenticationMock,

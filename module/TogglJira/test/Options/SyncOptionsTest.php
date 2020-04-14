@@ -16,9 +16,9 @@ class SyncOptionsTest extends TestCase
     {
         $data = [
             'lastSync' => new \DateTimeImmutable('2017-04-15T23:35:00+02:00'),
-            'jiraUserId' => 'foo',
-            'jiraUsername' => 'foo@bar.com',
-            'jiraPassword' => 'bar',
+            'jiraEmail' => 'bar@foo.com',
+            'jiraAccountId' => 'foo',
+            'jiraApiKey' => 'bar',
             'togglApiKey' => 'foz',
             'jiraUrl' => 'http://www.example.com',
         ];
@@ -26,9 +26,8 @@ class SyncOptionsTest extends TestCase
         $syncOptions = new SyncOptions($data);
 
         $this->assertEquals($data['lastSync'], $syncOptions->getLastSync());
-        $this->assertEquals($data['jiraUserId'], $syncOptions->getJiraUserId());
-        $this->assertEquals($data['jiraUsername'], $syncOptions->getJiraUsername());
-        $this->assertEquals($data['jiraPassword'], $syncOptions->getJiraPassword());
+        $this->assertEquals($data['jiraAccountId'], $syncOptions->getjiraAccountId());
+        $this->assertEquals($data['jiraApiKey'], $syncOptions->getjiraApiKey());
         $this->assertEquals($data['togglApiKey'], $syncOptions->getTogglApiKey());
         $this->assertEquals($data['jiraUrl'], $syncOptions->getJiraUrl());
     }
@@ -41,9 +40,9 @@ class SyncOptionsTest extends TestCase
     {
         $data = [
             'lastSync' => new \DateTimeImmutable('2017-04-15T23:35:00+02:00'),
-            'jiraUserId' => 'foo',
-            'jiraUsername' => 'foo@bar.com',
-            'jiraPassword' => 'bar',
+            'jiraEmail' => 'bar@foo.com',
+            'jiraAccountId' => 'foo',
+            'jiraApiKey' => 'bar',
             'togglApiKey' => 'foz',
             'jiraUrl' => 'http://www.example.com',
         ];

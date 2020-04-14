@@ -4,33 +4,49 @@ declare(strict_types=1);
 namespace TogglJira\Jira;
 
 use chobie\Jira\Api as BaseApi;
-use Exception;
 
 class Api extends BaseApi
 {
-    public function getUser(string $username): array
+    /**
+     * @param string $accountId
+     * @return array
+     */
+    public function getUser(string $accountId): array
     {
-        $userDetails = $this->api(self::REQUEST_GET, "/rest/api/2/user", ['username' => $username]);
+        $userDetails = $this->api(self::REQUEST_GET, "/rest/api/2/user", [
+            'accountId' => $accountId
+        ]);
 
         return $userDetails->getResult();
     }
 
     /**
+     * @param string $issueID
+     * @param int $seconds
+     * @param string $accountId
+     * @param string $comment
+     * @param string $created
+     * @param bool $overwrite
+     * @param bool $notifyUsers
      * @return array|BaseApi\Result|false
-     * @throws Exception
+     * @throws \Exception
      */
     public function addWorkLogEntry(
         string $issueID,
         int $seconds,
-        string $userKey,
+        string $accountId,
         string $comment,
         string $created,
         bool $overwrite,
         bool $notifyUsers = true
     ) {
         $notify = $notifyUsers ? 'true' : 'false';
+
         $params = [
             'timeSpentSeconds' => $seconds,
+            'author' => [
+                'accountId' => $accountId,
+            ],
             'comment' => $comment,
             'started' => $created,
         ];
@@ -38,25 +54,23 @@ class Api extends BaseApi
         $worklogResponse = $this->api(self::REQUEST_GET, "/rest/api/2/issue/{$issueID}/worklog");
         $workLogResult = $worklogResponse->getResult();
 
-        $startedDay = (new \DateTimeImmutable($params['started']))->format('Y-m-d');
+        $startedDay = (new \DateTimeImmutable($params['started']))->format('d-m-Y');
 
         if (isset($workLogResult['worklogs'])) {
             foreach ($workLogResult['worklogs'] as $workLog) {
-                $workLogStartedDay = (new \DateTimeImmutable($workLog['started']))->format('Y-m-d');
+                $workLogStartedDay = (new \DateTimeImmutable($workLog['started']))->format('d-m-Y');
 
-                if ($startedDay !== $workLogStartedDay || $workLog['author']['key'] !== $userKey) {
-                    continue;
-                }
+                if ($startedDay === $workLogStartedDay &&
+                    $workLog['author']['accountId'] === $accountId
+                ) {
+                    if (!$overwrite) {
+                        return $this->api(
+                            self::REQUEST_PUT,
+                            "/rest/api/2/issue/{$issueID}/worklog/{$workLog['id']}?adjustEstimate=auto&notifyUsers={$notify}",
+                            $params
+                        );
+                    }
 
-                if (!$overwrite) {
-                    return $this->api(
-                        self::REQUEST_PUT,
-                        "/rest/api/2/issue/{$issueID}/worklog/{$workLog['id']}?adjustEstimate=auto&notifyUsers={$notify}",
-                        $params
-                    );
-                }
-
-                if ($overwrite) {
                     /**
                      * When overwriting the worklogs, delete the existing worklogs first before recreating.
                      */
@@ -65,6 +79,8 @@ class Api extends BaseApi
             }
         }
 
-        return $this->api(self::REQUEST_POST, "/rest/api/2/issue/{$issueID}/worklog?adjustEstimate=auto&notifyUsers={$notify}", $params);
+        $result = $this->api(self::REQUEST_POST, "/rest/api/2/issue/{$issueID}/worklog?adjustEstimate=auto&notifyUsers={$notify}", $params);
+
+        return $result;
     }
 }

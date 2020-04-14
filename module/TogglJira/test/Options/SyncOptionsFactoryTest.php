@@ -31,8 +31,8 @@ class SyncOptionsFactoryTest extends BaseContainerTest
                 "timezone": "Europe/Amsterdam"
             },
             "jiraUrl": "https://jira.atlassian.net",
-            "jiraUsername": "foo",
-            "jiraPassword": "bar",
+            "jiraAccountId": "foo",
+            "jiraApiKey": "bar",
             "togglApiKey": "baz"
         }');
 
