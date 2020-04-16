@@ -146,6 +146,11 @@ class SyncService implements LoggerAwareInterface
      */
     private function parseTimeEntry(array $timeEntry): ?WorkLogEntry
     {
+        if (!$timeEntry['description']) {
+            $this->logger->warning("Time entry does not have a valid description.", $timeEntry);
+            return null;
+        }
+
         $data = [
             'issueID' => explode(' ', $timeEntry['description'])[0],
             'timeSpent' => $timeEntry['duration'],
